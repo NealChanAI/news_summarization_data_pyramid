@@ -21,10 +21,10 @@ warnings.filterwarnings("ignore")
 
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
-
+SUMMARY_RATE = 0.25
 
 class PseudoSummaryExtractive(object):
-    def __init__(self, output_file_name, input_file_name='sample_data_14000.csv'):
+    def __init__(self, output_file_name, input_file_name):
         self.res = []
         self.output_file_name = output_file_name
         self.input_file_name = input_file_name
@@ -112,10 +112,7 @@ class PseudoSummaryExtractive(object):
             target_idxs = sorted(target_idxs + [new_idx])
             source = gather_join(text, source_idxs)
             target = gather_join(text, target_idxs)
-            if (
-                len(source_idxs) == 1 or
-                1.0 * len(target) / len(source) > summary_rate
-            ):
+            if (len(source_idxs) == 1 or 1.0 * len(target) / len(source) > SUMMARY_RATE):
                 break
         if len(source) < len(target):
             source, target = target, source

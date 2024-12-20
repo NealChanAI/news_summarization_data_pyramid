@@ -36,10 +36,6 @@ def data_sample(dir_path):
     sampled_files = files[:10]
     sampled_files = files[:1000]
 
-    print('files:', files)
-    print('=' * 20)
-    print('sample_files:', sample_files)
-    print('=' * 20)
 
     res = []
     for file in sampled_files:
@@ -62,8 +58,9 @@ def workflow(result_path, dataset_path='THUCNews'):
     dir_path = osp.join(ROOT_DIR, 'data', dataset_path)
     cata_lst = os.listdir(dir_path)
     for cata in cata_lst:
+        print('类别:', cata)
         cata_res = data_sample(osp.join(dataset_path, cata))
-        res.extent(cata_res)
+        res.extend(cata_res)
     df = pd.DataFrame(res)
     df.to_csv(osp.join(ROOT_DIR, 'data', dataset_path, result_path), index=False)
 
