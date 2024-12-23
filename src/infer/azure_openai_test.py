@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # ===============================================================
 #
-#    @Create Author : chen.yongming(chen.yongming@zhaopin.com.cn)
+#    @Create Author : chenyongming
 #    @Create Time   : 2024/12/21 19:14
-#    @Description   : 
+#    @Description   : AZURE OPENAI API demo
 #
 # ===============================================================
 
@@ -13,12 +13,10 @@ import base64
 from openai import AzureOpenAI
 
 
-endpoint = os.getenv("ENDPOINT_URL")
+endpoint = os.getenv("AZURE_ENDPOINT_URL")
 deployment = os.getenv("DEPLOYMENT_NAME", "gpt-4o")
 subscription_key = os.getenv("AZURE_OPENAI_API_KEY")
 
-print(endpoint)
-print(subscription_key)
 
 # 使用基于密钥的身份验证来初始化 Azure OpenAI 客户端
 client = AzureOpenAI(
