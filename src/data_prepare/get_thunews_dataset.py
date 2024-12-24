@@ -33,15 +33,15 @@ def data_sample(dir_path):
 
     np.random.seed(1024)  # 设置随机种子
     np.random.shuffle(files)  # 随机打乱数据
+    # sampled_files = files[:1000]
     sampled_files = files[:10]
-    sampled_files = files[:1000]
-
 
     res = []
     for file in sampled_files:
         tar_file_path = osp.join(tar_path, file)
         with open(tar_file_path, 'r', encoding='utf-8') as fr:
             content = fr.read()
+            content = content.replace('\n', '。').replace('\r\n', '。')
         res.append(content)
 
     return res
@@ -62,9 +62,10 @@ def workflow(result_path, dataset_path='THUCNews'):
         cata_res = data_sample(osp.join(dataset_path, cata))
         res.extend(cata_res)
     df = pd.DataFrame(res)
-    df.to_csv(osp.join(ROOT_DIR, 'data', dataset_path, result_path), index=False)
+    df.to_csv(osp.join(ROOT_DIR, 'data', dataset_path, result_path), index=False, header=False)
 
 
 if __name__ == '__main__':
-    result_path = 'sample_data_14000.csv'
+    # result_path = 'sample_data_14000.csv'
+    result_path = 'sample_data_1400.csv'
     workflow(result_path)
