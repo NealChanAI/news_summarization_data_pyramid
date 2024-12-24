@@ -23,6 +23,7 @@ warnings.filterwarnings("ignore")
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 SUMMARY_RATE = 0.25
+PARA_LEN = 32
 MAX_LEN = 512
 # batch_size = 96
 # epochs = 100000
@@ -71,8 +72,19 @@ class PseudoSummaryExtractive(object):
             clean_sentences.pop(max_idx)
         return principal_sens
 
-    def text_segmentate(self, text, maxlen, seps=u'\n。；：，', strips=None):
-        """将文本按照标点符号划分为若干个短句"""
+    def text_segmentate(self, text, maxlen, seps=u'\n。！？；：，', strips=None):
+        """
+        将文本按照标点符号划分为若干个短句，使得每个短句的长度不超过maxlen个字符
+        注：每个短句中可能存在标点符号
+        Args:
+            text: 文章
+            maxlen: 短句的最大字符长度
+            seps: 分隔符
+            strips: 首尾特定字符列表
+
+        Returns:
+
+        """
         text = text.strip().strip(strips)
         if seps and len(text) > maxlen:
             pieces = text.split(seps[0])
@@ -93,7 +105,14 @@ class PseudoSummaryExtractive(object):
             return [text]
 
     def text_process(self, text):
-        """分割文本"""
+        """
+        分割文本流程（已弃用）
+        Args:
+            text:
+
+        Returns:
+
+        """
         texts = self.text_segmentate(text, 32)
 
         result, length = [], 0
@@ -120,27 +139,31 @@ class PseudoSummaryExtractive(object):
 
     def pseudo_summary(self, text):
         """构建伪标签摘要数据集"""
-        source_idxs = list(range(len(text)))
-        target_idxs = []
-        while True:
-            sims = []
-            for i in source_idxs:
-                new_source_idxs = [j for j in source_idxs if j != i]
-                new_target_idxs = sorted(target_idxs + [i])
-                new_source = self._gather_join(text, new_source_idxs)
-                new_target = self._gather_join(text, new_target_idxs)
-                sim = pylcs.lcs(new_source, new_target)
-                sims.append(sim)
-            new_idx = source_idxs[np.argmax(sims)]
-            source_idxs.remove(new_idx)
-            target_idxs = sorted(target_idxs + [new_idx])
-            source = self._gather_join(text, source_idxs)
-            target = self._gather_join(text, target_idxs)
-            if len(source_idxs) == 1 or 1.0 * len(target) / len(source) > SUMMARY_RATE:
-                break
-        if len(source) < len(target):
-            source, target = target, source
-        return source, target
+        try:
+            source_idxs = list(range(len(text)))
+            target_idxs = []
+            while True:
+                sims = []
+                for i in source_idxs:
+                    new_source_idxs = [j for j in source_idxs if j != i]
+                    new_target_idxs = sorted(target_idxs + [i])
+                    new_source = self._gather_join(text, new_source_idxs)
+                    new_target = self._gather_join(text, new_target_idxs)
+                    sim = pylcs.lcs(new_source, new_target)
+                    sims.append(sim)
+                new_idx = source_idxs[np.argmax(sims)]
+                source_idxs.remove(new_idx)
+                target_idxs = sorted(target_idxs + [new_idx])
+                source = self._gather_join(text, source_idxs)
+                target = self._gather_join(text, target_idxs)
+                if len(source_idxs) == 1 or 1.0 * len(target) / len(source) > SUMMARY_RATE:
+                    break
+            if len(source) < len(target):
+                source, target = target, source
+            return source, target
+        except BaseException as e:
+            print(text)
+            raise e
 
     def pseudo_summary_generate_workflow(self):
         """
@@ -151,9 +174,12 @@ class PseudoSummaryExtractive(object):
         # 获取数据集
         contents = get_thunews_data(self.input_file_name)
         # 遍历文章, 获取伪摘要
-        for content in contents:
-            paras = self.text_process(content)
-            text, summary = self.pseudo_summary(paras)
+        for i, content in enumerate(contents):
+            print(f'正在处理第{i+1}条...')
+            if len(content) <= PARA_LEN:
+                continue
+            texts = self.text_segmentate(content, PARA_LEN)
+            text, summary = self.pseudo_summary(texts)
             self.res.append('\u0001'.join([summary, text]))
         df = pd.DataFrame(self.res)
         data_save_path = osp.join(ROOT_DIR, 'data', 'THUCNews', self.output_file_name)
