@@ -175,8 +175,8 @@ class PseudoSummaryExtractive(object):
         contents = get_thunews_data(self.input_file_name)
         # 遍历文章, 获取伪摘要
         for i, content in enumerate(contents):
-            print(f'正在处理第{i+1}条...')
-            if len(content) <= PARA_LEN:
+            print(f'正在处理第{i+1}条, 文本长度为{len(content)}...')
+            if len(content) <= PARA_LEN or len(content) > 10000:
                 continue
             texts = self.text_segmentate(content, PARA_LEN)
             text, summary = self.pseudo_summary(texts)
@@ -188,7 +188,7 @@ class PseudoSummaryExtractive(object):
 
 if __name__ == '__main__':
     # init object
-    input_file_name = 'sample_data_1400.csv'
+    input_file_name = 'sample_data_10000_shizheng.csv'
     output_file_name = 'extractive_pseudo_summary_datasets.csv'
     extractor = PseudoSummaryExtractive(output_file_name, input_file_name)
 

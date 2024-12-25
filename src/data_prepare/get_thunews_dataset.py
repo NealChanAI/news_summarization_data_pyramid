@@ -17,9 +17,10 @@ warnings.filterwarnings("ignore")
 
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
+SAMPLE_NUMS = 10000
 
 
-def data_sample(dir_path):
+def data_sample(dir_path, sample_nums=10000):
     """
     对指定类别的新闻数据集进行采样
     Args:
@@ -33,8 +34,7 @@ def data_sample(dir_path):
 
     np.random.seed(1024)  # 设置随机种子
     np.random.shuffle(files)  # 随机打乱数据
-    # sampled_files = files[:1000]
-    sampled_files = files[:10]
+    sampled_files = files[:sample_nums]
 
     res = []
     for file in sampled_files:
@@ -47,10 +47,11 @@ def data_sample(dir_path):
     return res
 
 
-def workflow(result_path, dataset_path='THUCNews'):
+def workflow(result_path, sample_nums, dataset_path='THUCNews'):
     """
     完整工作流
     Args:
+        sample_nums: 每个类别的采样数
         dataset_path: THUNews数据集目录
     Returns:
     """
@@ -59,7 +60,9 @@ def workflow(result_path, dataset_path='THUCNews'):
     cata_lst = os.listdir(dir_path)
     for cata in cata_lst:
         print('类别:', cata)
-        cata_res = data_sample(osp.join(dataset_path, cata))
+        if cata != '时政':
+            continue
+        cata_res = data_sample(osp.join(dataset_path, cata), sample_nums)
         res.extend(cata_res)
     df = pd.DataFrame(res)
     df.to_csv(osp.join(ROOT_DIR, 'data', dataset_path, result_path), index=False, header=False)
@@ -67,5 +70,6 @@ def workflow(result_path, dataset_path='THUCNews'):
 
 if __name__ == '__main__':
     # result_path = 'sample_data_14000.csv'
-    result_path = 'sample_data_1400.csv'
-    workflow(result_path)
+    # result_path = 'sample_data_1400.csv'
+    result_path = f'sample_data_{SAMPLE_NUMS}_shizheng.csv'
+    workflow(result_path, SAMPLE_NUMS)

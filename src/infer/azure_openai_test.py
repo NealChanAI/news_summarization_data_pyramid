@@ -46,12 +46,18 @@ chat_prompt = [
                 "type": "text",
                 "text": "soul是什么app"
             },
-            {
-                "type": "text",
-                "text": "\n"
-            }
+            # {
+            #     "type": "text",
+            #     "text": "\n"
+            # }
         ]
     }
+]
+
+chat_prompt = [
+    {'role': 'system', 'content': '你是一个帮助用户查找信息的 AI 助手'},
+    {'role': 'user', 'content': 'soul是什么app'}
+
 ]
 
 # 如果已启用语音，则包括语音结果
@@ -71,3 +77,6 @@ completion = client.chat.completions.create(
 )
 
 print(completion.to_json())
+print('-' * 20)
+print(completion.choices[0].message.content)
+
