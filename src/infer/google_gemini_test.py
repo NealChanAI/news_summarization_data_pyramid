@@ -11,6 +11,8 @@
 from google import genai
 from google.genai import types
 import os
+import re
+import json
 
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -44,11 +46,10 @@ client = genai.Client(
     api_key=gemini_api_key
 )
 user_prompt = user_prompt.replace('${CONTENT}', text)
-print(user_prompt)
 
 response = client.models.generate_content(
-            model='gemini-2.0-flash-thinking-exp-1219',
-            # model='gemini-2.0-flash-exp',
+            # model='gemini-2.0-flash-thinking-exp-1219',
+            model='gemini-2.0-flash-exp',
             config=types.GenerateContentConfig(
                 system_instruction='你是一个资深的新闻摘要撰写专家，擅长为华语新闻撰写高质量的摘要(Abstractive Summary)',
                 top_p=0,
@@ -66,8 +67,23 @@ response = client.models.generate_content(
             ),
             contents=user_prompt
         )
-print(response.text)
 
+res = response.text
+print(res)
+print('-' * 10)
+
+json_pattern = r'```json\n({.*})\n```'  # 匹配 ```json 和 ``` 之间的内容
+match = re.search(json_pattern, res, re.DOTALL)
+
+if match:
+    # 提取匹配到的 JSON 内容
+    json_str = match.group(1)
+    print("匹配到的 JSON 字符串:", json_str)
+    # 解析 JSON 字符串
+    json_data = json.loads(json_str)
+    print("解析后的字典:", json_data)
+else:
+    print("未找到有效的 JSON 数据")
 
 # import google.generativeai as genai
 #

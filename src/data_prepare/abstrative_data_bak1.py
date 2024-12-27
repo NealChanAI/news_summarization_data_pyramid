@@ -2,8 +2,8 @@
 # ===============================================================
 #
 #    @Create Author : chenyongming
-#    @Create Time   : 2024-12-18 16:48
-#    @Description   : 基于LLM的abstractive summary生成(包括chatGLM, Gemini, Azure openAI)
+#    @Create Time   : 2024-12-26 17:00
+#    @Description   : 备份文件, chatGLM
 #
 # ===============================================================
 
@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import os
 from os import path as osp
+from zhipuai import core as zhipu_core
 from zhipuai import ZhipuAI
 import openai
 from google import genai
@@ -21,7 +22,6 @@ import sys
 import addict
 from utils.eval_util import compute_main_metric
 from utils.token_utils import num_tokens_from_string
-from utils.time_util import readable_time_string
 from utils import json_repair_util
 from utils.decorator_utils import retry_with_exponential_backoff
 from data_utils import get_thunews_data
@@ -85,20 +85,27 @@ class PseudoSummaryAbstractive(object):
             {'role': 'system', 'content': self.sys_prompt},
             {'role': 'user', 'content': user_prompt}
         ]
-
-        response = self.client.chat.completions.create(
-            model=model_version,
-            max_tokens=MAX_TOKENS,
-            messages=msg,
-            response_format={
-                'type': 'json_object'
-            },
-            temperature=0,
-            top_p=0,
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model=model_version,
+                max_tokens=MAX_TOKENS,
+                messages=msg,
+                response_format={
+                    'type': 'json_object'
+                },
+                temperature=0,
+                top_p=0,
+            )
+        except zhipu_core._errors.APIRequestFailedError as e:
+            print(e)
+            return {}
 
         res = response.choices[0].message.content
         _, res_dict = json_repair_util.try_parse_json_object(res)
+
+        # 若value不为string类型, 则返回空串
+        if not isinstance(res_dict['summary'], str):
+            return {}
 
         return res_dict
 
@@ -138,7 +145,7 @@ class PseudoSummaryAbstractive(object):
 
         return res_dict
 
-    # @retry_with_exponential_backoff
+    @retry_with_exponential_backoff
     def gemini_generate(self, content, model_version):
         """基于Google Gemini的ABS生成"""
         user_prompt = self.user_prompt.replace('${CONTENT}', content)
@@ -190,9 +197,9 @@ class PseudoSummaryAbstractive(object):
             for i, content in enumerate(text_lst):
                 if i < self.start_idx:
                     continue
-                print(f'{readable_time_string("%Y%m%d %H:%M:%S")}: Processing No. {i+1}...')
+                print(f'Processing No. {i+1}...')
                 res_dict = generate(content, self.model_version)
-                print(f'-- {readable_time_string("%Y%m%d %H:%M:%S")}: {res_dict}')
+                print(f'llm result: {res_dict}')
                 if res_dict:
                     fw.write('\u0001'.join([res_dict['summary'], content]))
                 else:
@@ -240,10 +247,10 @@ def _test2():
 
 if __name__ == '__main__':
     # init object
-    mode_type = 'gemini'
+    mode_type = 'zhipu'
     input_file_name = 'sample_data_10000_shizheng.csv'
     output_file_name = f'abstractive_pseudo_summary_datasets_{mode_type}.csv'
-    start_idx = 1486
+    start_idx = 73
 
     extractor = PseudoSummaryAbstractive(mode_type, output_file_name, input_file_name, start_idx)
     extractor.pseudo_summary_generate_workflow()

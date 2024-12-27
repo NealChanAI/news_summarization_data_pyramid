@@ -2,8 +2,8 @@
 # ===============================================================
 #
 #    @Create Author : chenyongming
-#    @Create Time   : 2024-12-18 16:48
-#    @Description   : 基于LLM的abstractive summary生成(包括chatGLM, Gemini, Azure openAI)
+#    @Create Time   : 2024-12-26 17:03
+#    @Description   : 备份文件, Azure OpenAI chatGPT
 #
 # ===============================================================
 
@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import os
 from os import path as osp
+from zhipuai import core as zhipu_core
 from zhipuai import ZhipuAI
 import openai
 from google import genai
@@ -62,7 +63,8 @@ class PseudoSummaryAbstractive(object):
             self.client = AzureOpenAI(
                 azure_endpoint=endpoint,
                 api_key=self.api_key,
-                api_version="2024-05-01-preview",
+                # api_version="2024-05-01-preview",
+                api_version="2024-08-01-preview",
             )
             self.model_version = OPENAI_MODEL_VERSION
         else:
@@ -85,27 +87,31 @@ class PseudoSummaryAbstractive(object):
             {'role': 'system', 'content': self.sys_prompt},
             {'role': 'user', 'content': user_prompt}
         ]
-
-        response = self.client.chat.completions.create(
-            model=model_version,
-            max_tokens=MAX_TOKENS,
-            messages=msg,
-            response_format={
-                'type': 'json_object'
-            },
-            temperature=0,
-            top_p=0,
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model=model_version,
+                max_tokens=MAX_TOKENS,
+                messages=msg,
+                response_format={
+                    'type': 'json_object'
+                },
+                temperature=0,
+                top_p=0,
+            )
+        except zhipu_core._errors.APIRequestFailedError as e:
+            print(e['error']['message'])
+            return {}
 
         res = response.choices[0].message.content
         _, res_dict = json_repair_util.try_parse_json_object(res)
 
         return res_dict
 
-    @retry_with_exponential_backoff
+    # @retry_with_exponential_backoff
     def openai_generate(self, content, model_version):
         """基于Azure OPENAI CHATGPT的ABS生成"""
         user_prompt = self.user_prompt.replace('${CONTENT}', content)
+        print('num_tokens_from_string: ', num_tokens_from_string(user_prompt))
         msg = [
             {'role': 'system', 'content': self.sys_prompt},
             {'role': 'user', 'content': user_prompt}
@@ -115,7 +121,7 @@ class PseudoSummaryAbstractive(object):
             model=model_version,
             messages=msg,
             # max_tokens=MAX_TOKENS,
-            max_tokens=1000,
+            max_tokens=800,
             temperature=0,
             top_p=0,
             frequency_penalty=0,
@@ -123,13 +129,7 @@ class PseudoSummaryAbstractive(object):
             stop=None,
             stream=False,
             response_format={
-                'type': 'json_schema',
-                'json_schema': {
-                    "properties": {
-                        "summary": {"type": "integer"}
-                    },
-                    "required": ["summary"]
-                }
+                'type': 'json_object',
             }
         )
 
@@ -138,7 +138,7 @@ class PseudoSummaryAbstractive(object):
 
         return res_dict
 
-    # @retry_with_exponential_backoff
+    @retry_with_exponential_backoff
     def gemini_generate(self, content, model_version):
         """基于Google Gemini的ABS生成"""
         user_prompt = self.user_prompt.replace('${CONTENT}', content)
@@ -216,15 +216,20 @@ def _test():
     extractor_openai = PseudoSummaryAbstractive('openai', output_file_name, input_file_name)
 
     text_lst = get_thunews_data(input_file_name)
-    content = text_lst[1]
-    print('智谱:')
-    print(extractor_zhipu.zhipu_generate(content, ZHIPU_MODEL_VERSION))
-    print('-' * 20)
-    print('GOOGLE:')
-    print(extractor_gemini.gemini_generate(content, GEMINI_MODEL_VERSION))
-    print('-' * 20)
+    content = text_lst[0]
+    print(num_tokens_from_string(content))
+    # print('智谱:')
+    # print(extractor_zhipu.zhipu_generate(content, ZHIPU_MODEL_VERSION))
+    # print('-' * 20)
+    # print('GOOGLE:')
+    # print(extractor_gemini.gemini_generate(content, GEMINI_MODEL_VERSION))
+    # print('-' * 20)
     print('OPENAI:')
     print(extractor_openai.openai_generate(content, OPENAI_MODEL_VERSION))
+    # print('-' * 10)
+    # content = text_lst[2]
+    # print(num_tokens_from_string(content))
+    # print(extractor_openai.openai_generate(content, OPENAI_MODEL_VERSION))
 
 
 def _test2():
@@ -240,12 +245,13 @@ def _test2():
 
 if __name__ == '__main__':
     # init object
-    mode_type = 'gemini'
+    mode_type = 'openai'
     input_file_name = 'sample_data_10000_shizheng.csv'
     output_file_name = f'abstractive_pseudo_summary_datasets_{mode_type}.csv'
-    start_idx = 1486
+    start_idx = 0
 
     extractor = PseudoSummaryAbstractive(mode_type, output_file_name, input_file_name, start_idx)
-    extractor.pseudo_summary_generate_workflow()
+    # extractor.pseudo_summary_generate_workflow()
 
+    _test()
     # _test2()

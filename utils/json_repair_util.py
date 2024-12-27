@@ -23,6 +23,25 @@ from json_repair import repair_json
 log = logging.getLogger(__name__)
 
 
+def get_clean_model_result(llm_res):
+    """
+    llm输出的字符串中以```json开头, 以```结尾, 需要将该部分数据剔除掉
+    Args:
+        llm_res: llm直接生成的结果
+
+    Returns:
+        clean_llm_res: 清洗过后的结果
+    """
+    json_pattern = r'```json\n({.*})\n```'  # 匹配 ```json 和 ``` 之间的内容
+    match = re.search(json_pattern, llm_res, re.DOTALL)
+    if match:
+        clean_llm_res = match.group(1)  # 提取匹配到的 JSON 内容
+    else:
+        print(f'llm generate result: {llm_res}')
+        raise Exception('can not parse llm generate result, please check it!!!')
+    return clean_llm_res
+
+
 def try_parse_ast_to_json(function_string: str) -> tuple[str, dict]:
     """
      # 示例函数字符串
@@ -58,11 +77,13 @@ def try_parse_json_object(input: str) -> tuple[str, dict]:
     except json.JSONDecodeError:
         log.info("Warning: Error decoding faulty json, attempting repair")
 
+
     if result:
         return input, result
 
     _pattern = r"\{(.*)\}"
-    _match = re.search(_pattern, input)
+    # _match = re.search(_pattern, input)
+    _match = re.search(_pattern, input, re.DOTALL)
     input = "{" + _match.group(1) + "}" if _match else input
 
     # Clean up json string.
