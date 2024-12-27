@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import os
 from os import path as osp
+from zhipuai import core as zhipu_core
 from zhipuai import ZhipuAI
 import openai
 from google import genai
@@ -62,7 +63,8 @@ class PseudoSummaryAbstractive(object):
             self.client = AzureOpenAI(
                 azure_endpoint=endpoint,
                 api_key=self.api_key,
-                api_version="2024-05-01-preview",
+                # api_version="2024-05-01-preview",
+                api_version="2024-08-01-preview",
             )
             self.model_version = OPENAI_MODEL_VERSION
         else:
@@ -85,20 +87,27 @@ class PseudoSummaryAbstractive(object):
             {'role': 'system', 'content': self.sys_prompt},
             {'role': 'user', 'content': user_prompt}
         ]
-
-        response = self.client.chat.completions.create(
-            model=model_version,
-            max_tokens=MAX_TOKENS,
-            messages=msg,
-            response_format={
-                'type': 'json_object'
-            },
-            temperature=0,
-            top_p=0,
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model=model_version,
+                max_tokens=MAX_TOKENS,
+                messages=msg,
+                response_format={
+                    'type': 'json_object'
+                },
+                temperature=0,
+                top_p=0,
+            )
+        except zhipu_core._errors.APIRequestFailedError as e:
+            print(e)
+            return {}
 
         res = response.choices[0].message.content
         _, res_dict = json_repair_util.try_parse_json_object(res)
+
+        # 若value不为string类型, 则返回空串
+        if not isinstance(res_dict['summary'], str):
+            return {}
 
         return res_dict
 
@@ -123,13 +132,7 @@ class PseudoSummaryAbstractive(object):
             stop=None,
             stream=False,
             response_format={
-                'type': 'json_schema',
-                'json_schema': {
-                    "properties": {
-                        "summary": {"type": "integer"}
-                    },
-                    "required": ["summary"]
-                }
+                'type': 'json_object',
             }
         )
 
@@ -138,7 +141,7 @@ class PseudoSummaryAbstractive(object):
 
         return res_dict
 
-    # @retry_with_exponential_backoff
+    @retry_with_exponential_backoff
     def gemini_generate(self, content, model_version):
         """基于Google Gemini的ABS生成"""
         user_prompt = self.user_prompt.replace('${CONTENT}', content)
