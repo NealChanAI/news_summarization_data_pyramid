@@ -243,12 +243,12 @@ def _test2():
 
 if __name__ == '__main__':
     # init object
-    mode_type = 'gemini'
+    model_type = 'gemini'
     input_file_name = 'sample_data_10000_shizheng.csv'
-    output_file_name = f'abstractive_pseudo_summary_datasets_{mode_type}.csv'
-    start_idx = 1486
+    output_file_name = f'abstractive_pseudo_summary_datasets_{model_type}.csv'
+    start_idx = 3833
 
-    extractor = PseudoSummaryAbstractive(mode_type, output_file_name, input_file_name, start_idx)
+    extractor = PseudoSummaryAbstractive(model_type, output_file_name, input_file_name, start_idx)
     extractor.pseudo_summary_generate_workflow()
 
     # _test2()
