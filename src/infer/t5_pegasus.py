@@ -2,8 +2,8 @@
 # ===============================================================
 #
 #    @Create Author : chenyongming
-#    @Create Time   : 2024-12-30 17:51
-#    @Description   : T5-PEGASUS finetune
+#    @Create Time   : 2024-12-31 17:55
+#    @Description   : T5-PEGASUS Base 推断脚本
 #
 # ===============================================================
 
@@ -37,20 +37,15 @@ BATCH_SIZE = 32
 EPOCHS = 2
 
 # 预训练模型路径
-# PRETRAIN_MODEL_PATH = 'chinese_t5_pegasus_base'
-PRETRAIN_MODEL_PATH = 'chinese_t5_pegasus_small'
+PRETRAIN_MODEL_PATH = 'chinese_t5_pegasus_base'
+# PRETRAIN_MODEL_PATH = 'chinese_t5_pegasus_small'
 CONFIG_PATH = osp.join(ROOT_DIR, 'model', PRETRAIN_MODEL_PATH, 'config.json')
 CHECKPOINT_PATH = osp.join(ROOT_DIR, 'model', PRETRAIN_MODEL_PATH, 'model.ckpt')
 DICT_PATH = osp.join(ROOT_DIR, 'model', PRETRAIN_MODEL_PATH, 'vocab.txt')
 
-# 模型保存路径
-MODEL_TYPE = 'first_stage'
-MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', MODEL_TYPE, 'best_model.weights')
-
 # 数据路径
-TRAINING_DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews', 'field_training_data.csv')
-VALIDING_DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews', 'field_validating_data.csv')
 TESTING_DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews', 'field_testing_data.csv')
+TESTING_DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews', '20241231_test.csv')
 
 
 def load_data(filename):
@@ -64,9 +59,8 @@ def load_data(filename):
 
 
 # 加载数据集
-train_data = load_data(TRAINING_DATA_PATH)
-valid_data = load_data(VALIDING_DATA_PATH)
 test_data = load_data(TESTING_DATA_PATH)
+
 
 # 构建分词器
 tokenizer = Tokenizer(
@@ -112,10 +106,10 @@ t5 = build_transformer_model(
     return_keras_model=False,
     name='T5',
     vocab_size=50000,
-    hidden_size=512,  # 替换为你配置文件中的值
-    num_hidden_layers=8,  # 替换为你配置文件中的值
-    num_attention_heads=6,  # 替换为你配置文件中的值
-    intermediate_size=1024,
+    hidden_size=768,
+    num_hidden_layers=12,
+    num_attention_heads=12,
+    intermediate_size=2048,
     hidden_act="gelu",
 )
 
@@ -158,22 +152,16 @@ class Evaluator(keras.callbacks.Callback):
         self.smooth = SmoothingFunction().method1
         self.best_bleu = 0.
 
-    def on_epoch_end(self, epoch, logs=None):
-        metrics = self.evaluate(valid_data)  # 评测模型
-        if metrics['bleu'] > self.best_bleu:
-            self.best_bleu = metrics['bleu']
-            model.save_weights(MODEL_SAVE_PATH)  # 保存模型
-        metrics['best_bleu'] = self.best_bleu
-        print('valid_data:', metrics)
-
     def evaluate(self, data, topk=1):
         total = 0
         rouge_1, rouge_2, rouge_l, bleu = 0, 0, 0, 0
         for summary, content in tqdm(data):
             total += 1
             summary = ' '.join(summary).lower()
-            pred_summary = ' '.join(autoSummarization.generate(content,
-                                                     topk=topk)).lower()
+            _pred_summary = autoSummarization.generate(content, topk=topk)
+            print(f'Content: {content}')
+            print(f'Summary: {_pred_summary}')
+            pred_summary = ' '.join(_pred_summary).lower()
             if pred_summary.strip():
                 scores = self.rouge.get_scores(hyps=pred_summary, refs=summary)
                 rouge_1 += scores[0]['rouge-1']['f']
@@ -199,15 +187,5 @@ class Evaluator(keras.callbacks.Callback):
 if __name__ == '__main__':
 
     evaluator = Evaluator()
-    train_generator = data_generator(train_data, BATCH_SIZE)
-
-    model.fit(
-        train_generator.forfit(),
-        steps_per_epoch=len(train_generator),
-        epochs=EPOCHS,
-        callbacks=[evaluator]
-    )
-
-else:
-
-    model.load_weights(MODEL_SAVE_PATH)
+    res = evaluator.evaluate(test_data)
+    print(res)
