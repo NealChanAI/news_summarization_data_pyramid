@@ -246,7 +246,7 @@ if __name__ == '__main__':
     model_type = 'gemini'
     input_file_name = 'sample_data_10000_shizheng.csv'
     output_file_name = f'abstractive_pseudo_summary_datasets_{model_type}.csv'
-    start_idx = 3833
+    start_idx = 4491
 
     extractor = PseudoSummaryAbstractive(model_type, output_file_name, input_file_name, start_idx)
     extractor.pseudo_summary_generate_workflow()

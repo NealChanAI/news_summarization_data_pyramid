@@ -18,6 +18,7 @@ warnings.filterwarnings("ignore")
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 SAMPLE_NUMS = 10000
+SAMPLE_PER_CATA_NUMS = 5000
 
 
 def data_sample(dir_path, sample_nums=10000):
@@ -47,21 +48,26 @@ def data_sample(dir_path, sample_nums=10000):
     return res
 
 
-def workflow(result_path, sample_nums, dataset_path='THUCNews'):
+def workflow(result_path, sample_nums, flag, dataset_path='THUCNews'):
     """
     完整工作流
     Args:
         sample_nums: 每个类别的采样数
         dataset_path: THUNews数据集目录
+        flag: 是否为抽取时政数据集，True为是，False为采集非时政的数据集
     Returns:
     """
     res = []
     dir_path = osp.join(ROOT_DIR, 'data', dataset_path)
-    cata_lst = os.listdir(dir_path)
+    cata_lst = [entry for entry in os.listdir(dir_path) if os.path.isdir(osp.join(dir_path, entry))]
     for cata in cata_lst:
         print('类别:', cata)
-        if cata != '时政':
-            continue
+        if flag:
+            if cata != '时政':
+                continue
+        else:
+            if cata == '时政':
+                continue
         cata_res = data_sample(osp.join(dataset_path, cata), sample_nums)
         res.extend(cata_res)
     df = pd.DataFrame(res)
@@ -69,7 +75,14 @@ def workflow(result_path, sample_nums, dataset_path='THUCNews'):
 
 
 if __name__ == '__main__':
-    # result_path = 'sample_data_14000.csv'
-    # result_path = 'sample_data_1400.csv'
+    # 获取shizheng数据集
     result_path = f'sample_data_{SAMPLE_NUMS}_shizheng.csv'
-    workflow(result_path, SAMPLE_NUMS)
+    flag = True
+    workflow(result_path, SAMPLE_NUMS, flag)
+
+    # 获取非shizheng数据集
+    result_path = f'sample_data_{SAMPLE_PER_CATA_NUMS}_not_shizheng.csv'
+    flag = False
+    workflow(result_path, SAMPLE_PER_CATA_NUMS, flag)
+
+
