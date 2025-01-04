@@ -12,7 +12,10 @@ from transformers import MT5ForConditionalGeneration
 from os import path as osp
 import jieba
 from transformers import BertTokenizer, BatchEncoding
-from torch._six import container_abcs, string_classes, int_classes
+# from torch._six import container_abcs, string_classes, int_classes
+from collections.abc import Mapping, Sequence, Container
+string_classes = (str,)
+int_classes = (int,)
 import torch
 from torch.utils.data import DataLoader, Dataset
 import re
@@ -157,11 +160,11 @@ def default_collate(batch):
         return torch.tensor(batch, dtype=torch.long)
     elif isinstance(elem, string_classes):
         return batch
-    elif isinstance(elem, container_abcs.Mapping):
+    elif isinstance(elem, Mapping):
         return {key: default_collate([d[key] for d in batch]) for key in elem}
     elif isinstance(elem, tuple) and hasattr(elem, '_fields'):  # namedtuple
         return elem_type(*(default_collate(samples) for samples in zip(*batch)))
-    elif isinstance(elem, container_abcs.Sequence):
+    elif isinstance(elem, Sequence):
         # check to make sure that the elements in batch have consistent size
         it = iter(batch)
         elem_size = len(next(it))
