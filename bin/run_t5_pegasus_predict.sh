@@ -57,7 +57,8 @@ function model_infer() {
   echo_info "========== model infer..."
 
   python src/infer/t5_pegasus_predict.py \
-  --test data/THUCNews/companies_news_info.txt \
+  --test_data data/THUCNews/companies_news_info.txt \
+  --result_file data/THUCNews/companies_news_info.tsv \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
