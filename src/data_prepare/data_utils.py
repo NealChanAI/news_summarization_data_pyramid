@@ -75,3 +75,16 @@ def get_thunews_data(file_path='sample_data_14000.csv'):
     with open(data_save_path, 'r', encoding='utf-8') as f:
         res = [line for line in f.readlines()]
     return res
+
+
+def get_500_top_companies_news_info(target_file, source_file='500强_news_info_raw.xlsx'):
+    """获取业务方所需数据集"""
+    data_path = osp.join(ROOT_DIR, 'data', 'THUCNews')
+    source_file = osp.join(data_path, source_file)
+    target_file = osp.join(data_path, target_file)
+
+    df = pd.read_excel(source_file, engine='openpyxl')
+    with open(target_file, mode='w', encoding='utf-8') as fw:
+        for _, row in df.iterrows():
+            fw.write('\u0001'.join([row['abstract'], row['content']]) + '\n')
+
