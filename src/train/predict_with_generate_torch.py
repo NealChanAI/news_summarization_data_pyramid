@@ -269,10 +269,10 @@ def init_argument():
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model', default=osp.join(MODEL_SAVE_PATH, 'saved_model','summary_model'))
 
-    parser.add_argument('--batch_size', default=16, help='batch size')
-    parser.add_argument('--max_len', default=512, help='max length of inputs')
-    parser.add_argument('--max_len_generate', default=40, help='max length of generated text')
-    parser.add_argument('--use_multiprocess', default=False, action='store_true')
+    parser.add_argument('--batch_size', type=int, default=16, help='batch size')
+    parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
+    parser.add_argument('--max_len_generate', type=int, default=40, help='max length of generated text')
+    parser.add_argument('--use_multiprocess', type=bool, default=False, action='store_true')
 
     args = parser.parse_args()
     return args
