@@ -86,5 +86,7 @@ def get_500_top_companies_news_info(target_file, source_file='500强_news_info_r
     df = pd.read_excel(source_file, engine='openpyxl')
     with open(target_file, mode='w', encoding='utf-8') as fw:
         for _, row in df.iterrows():
-            fw.write('\u0001'.join([row['abstract'], row['content']]) + '\n')
+            abstract = row['abstract'].replace('\n', '')
+            content = row['content'].replace('\n', '')
+            fw.write('\u0001'.join([abstract, content]) + '\n')
 
