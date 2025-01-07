@@ -39,7 +39,8 @@ def load_data(filename):
     D = []
     with open(filename, encoding='utf-8') as f:
         for l in f.readlines():
-            cur = l.strip().split('\t')
+            # cur = l.strip().split('\t')
+            cur = l.strip().split('\u0001')
             if len(cur) == 2:
                 title, content = cur[0], cur[1]
                 D.append((title, content))
@@ -278,12 +279,12 @@ def init_argument():
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'saved_model'))
 
-    parser.add_argument('--num_epoch', default=20, help='number of epoch')
-    parser.add_argument('--batch_size', default=16, help='batch size')
-    parser.add_argument('--lr', default=2e-4, help='learning rate')
+    parser.add_argument('--num_epoch', type=int, default=20, help='number of epoch')
+    parser.add_argument('--batch_size', type=int, default=16, help='batch size')
+    parser.add_argument('--lr', type=float, default=2e-4, help='learning rate')
     parser.add_argument('--data_parallel', default=False)
-    parser.add_argument('--max_len', default=512, help='max length of inputs')
-    parser.add_argument('--max_len_generate', default=40, help='max length of outputs')
+    parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
+    parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
 
     args = parser.parse_args()
     return args

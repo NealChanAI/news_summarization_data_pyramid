@@ -33,7 +33,9 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
 MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model')
-PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base')
+print(f'MODEL_SAVE_PATH: {MODEL_SAVE_PATH}')
+print(f'ROOT_DIR: {ROOT_DIR}')
+PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
 
 
 def load_data(filename):
@@ -260,11 +262,12 @@ def generate_multiprocess(feature):
 
 
 def init_argument():
+    print(osp.join(MODEL_SAVE_PATH, '/saved_model/summary_model'))
     parser = argparse.ArgumentParser(description='t5-pegasus-chinese')
     parser.add_argument('--test_data', default=osp.join(DATA_PATH, 'predict.tsv'))
     parser.add_argument('--result_file', default=osp.join(DATA_PATH, 'predict_result.tsv'))
-    parser.add_argument('--pretrain_model', default=osp.join(PRETRAIN_MODEL_PATH, 'chinese_t5_pegasus_base'))
-    parser.add_argument('--model', default='./saved_model/summary_model')
+    parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
+    parser.add_argument('--model', default=osp.join(MODEL_SAVE_PATH, 'saved_model','summary_model'))
 
     parser.add_argument('--batch_size', default=16, help='batch size')
     parser.add_argument('--max_len', default=512, help='max length of inputs')
