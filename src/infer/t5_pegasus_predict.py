@@ -32,15 +32,13 @@ import rouge
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
-MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model')
-print(f'MODEL_SAVE_PATH: {MODEL_SAVE_PATH}')
-print(f'ROOT_DIR: {ROOT_DIR}')
+MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'saved_model')
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
 
 
 def load_data(filename):
     """加载数据
-    单条格式：(正文) 或 (标题, 正文)
+    单条格式：(正文) 或 (摘要, 正文)
     """
     D = []
     with open(filename, encoding='utf-8') as f:
@@ -179,8 +177,7 @@ def default_collate(batch):
 
 
 def prepare_data(args, tokenizer):
-    """准备batch数据
-    """
+    """准备batch数据"""
     test_data = load_data(args.test_data)
     test_data = create_data(test_data, tokenizer, args.max_len)
     test_data = KeyDataset(test_data)
@@ -189,8 +186,7 @@ def prepare_data(args, tokenizer):
 
 
 def compute_rouge(source, target):
-    """计算rouge-1、rouge-2、rouge-l
-    """
+    """计算rouge-1、rouge-2、rouge-l"""
 
     source, target = ' '.join(source), ' '.join(target)
     try:
@@ -247,8 +243,7 @@ def generate(test_data, model, tokenizer, args):
 
 
 def generate_multiprocess(feature):
-    """多进程
-    """
+    """多进程"""
     model.eval()
     raw_data = feature['raw_data']
     content = {k: v for k, v in feature.items() if k != 'raw_data'}
@@ -262,12 +257,12 @@ def generate_multiprocess(feature):
 
 
 def init_argument():
-    print(osp.join(MODEL_SAVE_PATH, '/saved_model/summary_model'))
     parser = argparse.ArgumentParser(description='t5-pegasus-chinese')
     parser.add_argument('--test_data', default=osp.join(DATA_PATH, 'predict.tsv'))
     parser.add_argument('--result_file', default=osp.join(DATA_PATH, 'predict_result.tsv'))
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
-    parser.add_argument('--model', default=osp.join(MODEL_SAVE_PATH, 'saved_model','summary_model'))
+    parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'summary_model'))
+    parser.add_argument('--model_specific_dir', default=MODEL_SPECIFIC_PATH)
 
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
@@ -288,7 +283,8 @@ if __name__ == '__main__':
     test_data = prepare_data(args, tokenizer)
 
     # step 3. load finetuned model
-    model = torch.load(args.model, map_location=device)
+    model_path = osp.join(args.model_dir, args.model_specific_dir)
+    model = torch.load(model_path, map_location=device)
 
     # step 4. predict
     res = []

@@ -1,5 +1,5 @@
 #!/bin/bash
-# 模型训练
+# 模型推断
 
 set -eu
 
@@ -53,30 +53,28 @@ function declare_variables() {
       """
 }
 
-function model_train() {
-  echo_info "========== model train..."
+function model_infer() {
+  echo_info "========== model infer..."
 
-  python src/train/t5_pegasus_finetune_torch.py \
-  --train_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.csv \
-  --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.csv \
+  python src/infer/t5_pegasus_predict.py \
+  --test data/THUCNews/companies_news_info.txt \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
-  --num_epoch 20 \
-  --batch_size 8 \
-  --lr 2e-4 \
-  --data_parallel False \
+  --batch_size 16 \
   --max_len 512 \
-  --max_len_generate 40 
+  --max_len_generate 40 \
+  --use_multiprocess False
+
 }
 
 function main() {
-  echo_info "==================== start model train script..."
+  echo_info "==================== start model infer script..."
 #  check_args "$@"
   declare_variables
   prepare_python_env
 
-  time_diff model_train
+  time_diff model_infer
   echo_info "==================== all jobs finished~"
 }
 

@@ -1,5 +1,5 @@
 bert4torch==0.2.9
-certifi==2024.12.14
+# certifi==2024.12.14
 charset-normalizer==3.4.1
 click==8.1.8
 filelock==3.16.1

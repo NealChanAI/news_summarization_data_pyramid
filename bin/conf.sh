@@ -7,6 +7,9 @@ DATA_DIR="${ROOT_DIR}/data"
 MODEL_DIR="${ROOT_DIR}/model"
 TMP_DIR="${ROOT_DIR}/tmp"
 LOG_DIR="${ROOT_DIR}/logs/content_understanding"
+# 模型保存路径
+MODEL_SAVE_PATH="${ROOT_DIR}/model/saved_model"
+T5_PEGASUS="t5_pegasus"
 
 if [ ! -d "$DATA_DIR" ]; then
     mkdir -p "$DATA_DIR"

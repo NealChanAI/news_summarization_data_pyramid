@@ -29,6 +29,7 @@ from transformers import MT5ForConditionalGeneration, BertTokenizer
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
 MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model')
+MODEL_SPECIFIC_PATH = 't5_pegasus'
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
 
 
@@ -266,9 +267,9 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         if rouge_l > best:
             best = rouge_l
             if args.data_parallel and torch.cuda.is_available():
-                torch.save(model.module, os.path.join(args.model_dir, 'summary_model'))
+                torch.save(model.module, os.path.join(args.model_dir, 't5_pegasus_summary_model'))
             else:
-                torch.save(model, os.path.join(args.model_dir, 'summary_model'))
+                torch.save(model, os.path.join(args.model_dir, args.model_specific_dir))
         # torch.save(model, os.path.join(args.model_dir, 'summary_model_epoch_{}'.format(str(epoch))))
 
 
@@ -278,6 +279,7 @@ def init_argument():
     parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'dev.tsv'))
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'saved_model'))
+    parser.add_argument('--model_specific_dir', default=MODEL_SPECIFIC_PATH)
 
     parser.add_argument('--num_epoch', type=int, default=20, help='number of epoch')
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
