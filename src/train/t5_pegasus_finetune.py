@@ -17,6 +17,8 @@ import torch
 import argparse
 import numpy as np
 from tqdm.auto import tqdm
+from utils import log
+from utils import time_util
 from bert4torch.models import *
 from torch.utils.data import DataLoader, Dataset
 # from torch._six import container_abcs, string_classes, int_classes
@@ -31,6 +33,7 @@ DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
 MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model')
 MODEL_SPECIFIC_PATH = 't5_pegasus'
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
+LOG_DIR = osp.join(ROOT_DIR, "logs")  # 日志目录
 
 
 def load_data(filename):
@@ -89,7 +92,7 @@ def create_data(data, tokenizer, max_len=512, term='train'):
         text_ids = tokenizer.encode(content, max_length=max_len, truncation='only_first')
         if flag and term == 'train':
             flag = False
-            print(content)
+            # print(content)
         if term == 'train':
             summary_ids = tokenizer.encode(title, max_length=max_len, truncation='only_first')
             features = {'input_ids': text_ids,
@@ -233,7 +236,7 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
             loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
             loss = loss_fct(prob, labels)
             if i % 100 == 0:
-                print("Iter {}:  Training Loss: {}".format(i, loss.item()))
+                log.logger.info("Iter {}:  Training Loss: {}".format(i, loss.item()))
             loss.backward()
             adam.step()
             adam.zero_grad()
@@ -262,7 +265,7 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
             gens.extend(gen)
             summaries.extend(title)
         scores = compute_rouges(gens, summaries)
-        print("Validation Loss: {}".format(scores))
+        log.logger.info("Validation Loss: {}".format(scores))
         rouge_l = scores['rouge-l']
         if rouge_l > best:
             best = rouge_l
@@ -292,17 +295,31 @@ def init_argument():
     return args
 
 
+def _log_args():
+    """打印输入参数"""
+    log.logger.debug('===== input args =====')
+    for k, v in args.__dict__.items():
+        log.logger.debug(f'{k}: {v}')
+    log.logger.debug('')
+
+
 if __name__ == '__main__':
 
     # step 1. init argument
     args = init_argument()
 
-    # step 2. prepare training data and validation data
+    # step 2. init log
+    current_time = time_util.readable_time_string('%y%m%d%H%M%S')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.log')
+    log.init_logger('train', LOG_FILE)
+    _log_args()
+
+    # step 3. prepare training data and validation data
     tokenizer = T5PegasusTokenizer.from_pretrained(args.pretrain_model)
     train_data = prepare_data(args, args.train_data, tokenizer, term='train')
     dev_data = prepare_data(args, args.dev_data, tokenizer, term='dev')
 
-    # step 3. load pretrain model
+    # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = MT5ForConditionalGeneration \
         .from_pretrained(args.pretrain_model).to(device)
@@ -310,6 +327,6 @@ if __name__ == '__main__':
         device_ids = range(torch.cuda.device_count())
         model = torch.nn.DataParallel(model, device_ids=device_ids)
 
-    # step 4. finetune
+    # step 5. finetune
     adam = torch.optim.Adam(model.parameters(), lr=args.lr)
     train_model(model, adam, train_data, dev_data, tokenizer, device, args)
