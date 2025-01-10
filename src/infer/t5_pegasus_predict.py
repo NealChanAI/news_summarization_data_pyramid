@@ -34,6 +34,7 @@ ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # é¡¹ç›
 DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
 MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'saved_model')
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
+MODEL_SPECIFIC_PATH = 't5_pegasus'
 
 
 def load_data(filename):
@@ -43,7 +44,7 @@ def load_data(filename):
     D = []
     with open(filename, encoding='utf-8') as f:
         for l in f.readlines():
-            cur = l.strip().split('\t')
+            cur = l.strip().split('\u0001')
             if len(cur) == 2:
                 title, content = cur[0], cur[1]
                 D.append((title, content))
@@ -97,7 +98,7 @@ def create_data(data, tokenizer, max_len):
 
         if flag:
             flag = False
-            print(content)
+            # print(content)
 
         features = {'input_ids': text_ids,
                     'attention_mask': [1] * len(text_ids),
@@ -267,7 +268,7 @@ def init_argument():
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of generated text')
-    parser.add_argument('--use_multiprocess', type=bool, default=False, action='store_true')
+    parser.add_argument('--use_multiprocess', default=False, action='store_true')
 
     args = parser.parse_args()
     return args
