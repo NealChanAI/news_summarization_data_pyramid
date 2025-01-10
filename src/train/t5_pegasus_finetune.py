@@ -270,7 +270,7 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         if rouge_l > best:
             best = rouge_l
             if args.data_parallel and torch.cuda.is_available():
-                torch.save(model.module, os.path.join(args.model_dir, 't5_pegasus_summary_model'))
+                torch.save(model.module, os.path.join(args.model_dir, args.model_specific_dir))
             else:
                 torch.save(model, os.path.join(args.model_dir, args.model_specific_dir))
         # torch.save(model, os.path.join(args.model_dir, 'summary_model_epoch_{}'.format(str(epoch))))
@@ -310,7 +310,7 @@ if __name__ == '__main__':
 
     # step 2. init log
     current_time = time_util.readable_time_string('%y%m%d%H%M%S')
-    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.log')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.train.log')
     log.init_logger('train', LOG_FILE)
     _log_args()
 

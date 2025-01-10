@@ -291,7 +291,7 @@ if __name__ == '__main__':
 
     # step 2. init log
     current_time = time_util.readable_time_string('%y%m%d%H%M%S')
-    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.log')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.predict.log')
     log.init_logger('train', LOG_FILE)
     _log_args()
 
