@@ -37,6 +37,7 @@ DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
 MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'saved_model')
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
 MODEL_SPECIFIC_PATH = 't5_pegasus'
+LOG_DIR = osp.join(ROOT_DIR, "logs")  # 日志目录
 
 
 def load_data(filename):
@@ -275,6 +276,13 @@ def init_argument():
     args = parser.parse_args()
     return args
 
+
+def _log_args():
+    """打印输入参数"""
+    log.logger.debug('===== input args =====')
+    for k, v in args.__dict__.items():
+        log.logger.debug(f'{k}: {v}')
+    log.logger.debug('')
 
 if __name__ == '__main__':
 
