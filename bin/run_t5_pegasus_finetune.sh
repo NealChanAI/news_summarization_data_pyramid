@@ -56,7 +56,7 @@ function declare_variables() {
 function model_train() {
   echo_info "========== model train..."
 
-  python src/train/t5_pegasus_finetune_torch.py \
+  python src/train/t5_pegasus_finetune.py \
   --train_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.csv \
   --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.csv \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \

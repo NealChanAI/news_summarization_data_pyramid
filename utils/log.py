@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # ===============================================================
 #
-#    @Create Author : zhangquan
-#    @Create Time   : 2024/6/21 16:04
+#    @Create Author :
+#    @Create Time   :
 #    @Description   : 离线流程日志模块
 #
 # ===============================================================
@@ -14,6 +14,7 @@ import logging
 import os
 import os.path as osp
 import sys
+
 
 logger = None  # type: logging.Logger
 

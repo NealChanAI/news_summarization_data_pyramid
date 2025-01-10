@@ -239,8 +239,8 @@ def generate(test_data, model, tokenizer, args):
                 summaries.extend(feature['title'])
     if summaries:
         scores = compute_rouges(gens, summaries)
-        print(scores)
-    print('Done!')
+        log.logger.info(scores)
+    log.logger.info('Done!')
 
 
 def generate_multiprocess(feature):
@@ -279,25 +279,31 @@ if __name__ == '__main__':
     # step 1. init argument
     args = init_argument()
 
-    # step 2. prepare test data
+    # step 2. init log
+    current_time = time_util.readable_time_string('%y%m%d%H%M%S')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.log')
+    log.init_logger('train', LOG_FILE)
+    _log_args()
+
+    # step 3. prepare test data
     tokenizer = T5PegasusTokenizer.from_pretrained(args.pretrain_model)
     test_data = prepare_data(args, tokenizer)
 
-    # step 3. load finetuned model
+    # step 4. load finetuned model
     model_path = osp.join(args.model_dir, args.model_specific_dir)
     model = torch.load(model_path, map_location=device)
 
-    # step 4. predict
+    # step 5. predict
     res = []
     if args.use_multiprocess and device == 'cpu':
-        print('Parent process %s.' % os.getpid())
+        log.logger.info('Parent process %s.' % os.getpid())
         p = Pool(2)
         res = p.map_async(generate_multiprocess, test_data, chunksize=2).get()
-        print('Waiting for all subprocesses done...')
+        log.logger.info('Waiting for all subprocesses done...')
         p.close()
         p.join()
         res = pd.DataFrame([item for batch in res for item in batch])
         res.to_csv(args.result_file, index=False, header=False, encoding='utf-8')
-        print('Done!')
+        log.logger.info('Done!')
     else:
         generate(test_data, model, tokenizer, args)
