@@ -16,6 +16,7 @@ import sys
 from utils.eval_util import compute_main_metric
 import json
 import pylcs
+import random
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -89,4 +90,69 @@ def get_500_top_companies_news_info(target_file, source_file='500强_news_info_r
             abstract = row['abstract'].replace('\n', '')
             content = row['content'].replace('\n', '')
             fw.write('\u0001'.join([abstract, content]) + '\n')
+
+
+def _content_clean_workflow(content):
+    """对正文content进行清洗"""
+    # 首行默认为content title, 为其加上书名号
+    if not content or content == 'nan':
+        return
+    try:
+        sentences = content.split('\n')
+    except AttributeError as e:
+        print(content)
+        raise e
+    sentences[0] = '《' + sentences[0] + '》'
+    content = ''.join([sen.strip() for sen in sentences])
+    return content
+
+def get_500_top_companies_news_info_v2(target_file, source_file='20250108-ABS.xlsx'):
+    """对手工抽取的数据集进行清洗, 并存到目标文件中"""
+    data_path = osp.join(ROOT_DIR, 'data', 'THUCNews')
+    source_file = osp.join(data_path, source_file)
+    target_file = osp.join(data_path, target_file)
+
+    df = pd.read_excel(source_file, engine='openpyxl')
+    with open(target_file, mode='w', encoding='utf-8') as fw:
+        for _, row in df.iterrows():
+            abstract = row['abs'].replace('\n', '')
+            content = _content_clean_workflow(str(row['content']))
+
+            if not content:
+                continue
+            # print(content)
+            fw.write('\u0001'.join([abstract, content]) + '\n')
+
+
+def train_test_split(file_path='companies_news_info_v2.txt', ratio=0.6):
+    """训练测试数据集分割"""
+    data_path = osp.join(ROOT_DIR, 'data', 'THUCNews')
+    source_file = osp.join(data_path, file_path)
+    train_file = osp.join(data_path, file_path[:-3] + 'train.txt')
+    test_file = osp.join(data_path, file_path[:-3] + 'test.txt')
+    print(train_file)
+    print(test_file)
+
+    with open(source_file, mode='r', encoding='utf-8') as fr:
+        dataset = [line for line in fr.readlines()]
+
+    # 随机打乱数据集
+    random.seed(1024)
+    random.shuffle(dataset)
+
+    # 计算分割点
+    split_index = int(len(dataset) * ratio)
+    training_set = dataset[:split_index]
+    testing_set = dataset[split_index:]
+
+    with open(train_file, mode='w', encoding='utf-8') as f_train, \
+        open(test_file, mode='w', encoding='utf-8') as f_test:
+        for _train in training_set:
+            f_train.write(_train)
+        for _test in testing_set:
+            f_test.write(_test)
+
+
+
+
 
