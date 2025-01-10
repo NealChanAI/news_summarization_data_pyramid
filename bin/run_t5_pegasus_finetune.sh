@@ -57,8 +57,8 @@ function model_train() {
   echo_info "========== model train..."
 
   python src/train/t5_pegasus_finetune.py \
-  --train_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.csv \
-  --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.csv \
+  --train_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.train.txt \
+  --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.test.txt \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \

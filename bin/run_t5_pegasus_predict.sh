@@ -57,15 +57,14 @@ function model_infer() {
   echo_info "========== model infer..."
 
   python src/infer/t5_pegasus_predict.py \
-  --test_data data/THUCNews/companies_news_info.txt \
-  --result_file data/THUCNews/companies_news_info.tsv \
+  --test_data data/THUCNews/companies_news_info_v2.test.txt \
+  --result_file data/THUCNews/companies_news_info_v2.test.direct_finetune.tsv \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
   --batch_size 16 \
   --max_len 512 \
-  --max_len_generate 40 \
-  --use_multiprocess False
+  --max_len_generate 40
 
 }
 
