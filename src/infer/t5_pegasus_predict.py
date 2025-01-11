@@ -274,6 +274,7 @@ def init_argument():
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of generated text')
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
     parser.add_argument('--use_multiprocess', default=False, action='store_true')
+    parser.add_argument('--version', type=str, default='v1', help='version')
     parser.add_argument('--stage', type=str, default='one_stage',
                         choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
 

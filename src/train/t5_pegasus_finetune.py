@@ -220,13 +220,11 @@ def compute_rouges(sources, targets):
 
 
 def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
-    if not os.path.exists(args.model_dir):
-        os.mkdir(args.model_dir)
-    tmp_path = os.path.join(args.model_dir, args.model_specific_dir)
-    print(f'tmp_path: {tmp_path}')
-    if not os.path.exists(tmp_path):
-        os.mkdir(tmp_path)
-        print('success')
+    # if not os.path.exists(args.model_dir):
+    #     os.mkdir(args.model_dir)
+    model_save_path = os.path.join(args.model_dir, args.model_specific_dir)
+    if not os.path.exists(model_save_path):
+        os.mkdir(model_save_path)
 
     best = 0
     for epoch in range(args.num_epoch):
@@ -276,9 +274,9 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         if rouge_l > best:
             best = rouge_l
             if args.data_parallel and torch.cuda.is_available():
-                torch.save(model.module, os.path.join(args.model_dir, args.model_specific_dir, args.stage))
+                torch.save(model.module, os.path.join(model_save_path, args.stage + '_' + args.version))
             else:
-                torch.save(model, os.path.join(args.model_dir, args.model_specific_dir, args.stage))
+                torch.save(model, os.path.join(model_save_path, args.stage + '_' + args.version))
         # torch.save(model, os.path.join(args.model_dir, 'summary_model_epoch_{}'.format(str(epoch))))
 
 
@@ -297,6 +295,7 @@ def init_argument():
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
+    parser.add_argument('--version', type=str, default='v1', help='version')
     parser.add_argument('--stage', type=str, default='one_stage',
                         choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
 
@@ -333,7 +332,7 @@ if __name__ == '__main__':
     if args.stage.startswith('one_stage'):  # 加载预训练模型
         model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
     else:  # 加载微调好的模型
-        model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage)
+        model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version)
         model = torch.load(model_path, map_location=device)
 
     if args.data_parallel and torch.cuda.is_available():

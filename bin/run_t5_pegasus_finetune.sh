@@ -68,6 +68,7 @@ function model_train() {
   --data_parallel False \
   --max_len 1024 \
   --max_len_generate 150 \
+  --version v1 \
   --stage one_stage
   # --train_data data/THUCNews/companies_news_info_v2.train.txt \
   # --dev_data data/THUCNews/companies_news_info_v2.train.txt \
