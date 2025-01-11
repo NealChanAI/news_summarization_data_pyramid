@@ -222,6 +222,11 @@ def compute_rouges(sources, targets):
 def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
     if not os.path.exists(args.model_dir):
         os.mkdir(args.model_dir)
+    tmp_path = os.path.join(args.model_dir, args.model_specific_dir)
+    print(f'tmp_path: {tmp_path}')
+    if not os.path.exists(tmp_path):
+        os.mkdir(tmp_path)
+        print('success')
 
     best = 0
     for epoch in range(args.num_epoch):

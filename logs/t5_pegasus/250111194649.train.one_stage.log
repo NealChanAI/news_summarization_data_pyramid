@@ -1,0 +1,24 @@
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:51] ========== new log ==========
+2025-01-11 19:46:49,242	[DEBUG]	[algo_reco.train]	[log.py:52] logfile is [/root/develop/news_summarization_data_pyramid/logs/t5_pegasus/250111194649.train.one_stage.log]
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:60] init logger done
+2025-01-11 19:46:49,242	[INFO]	[algo_reco.train]	[log.py:61] 
+2025-01-11 19:46:49,242	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:306] ===== input args =====
+2025-01-11 19:46:49,242	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] train_data: data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.train.txt
+2025-01-11 19:46:49,242	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] dev_data: data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.test.txt
+2025-01-11 19:46:49,242	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] pretrain_model: /root/develop/news_summarization_data_pyramid/model/chinese_t5_pegasus_base_torch
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] model_dir: /root/develop/news_summarization_data_pyramid/model/saved_model
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] model_specific_dir: t5_pegasus
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] num_epoch: 20
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] batch_size: 4
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] lr: 0.0002
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] data_parallel: False
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] max_len: 1024
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] max_len_generate: 150
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] length_penalty: 1.2
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:308] stage: one_stage
+2025-01-11 19:46:49,243	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.py:309] 

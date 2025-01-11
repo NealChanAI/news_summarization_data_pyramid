@@ -37,3 +37,11 @@
 2025-01-11 19:32:10,770	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1200:  Training Loss: 2.500150680541992
 2025-01-11 19:32:34,435	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1300:  Training Loss: 1.9089146852493286
 2025-01-11 19:32:57,580	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1400:  Training Loss: 2.6617352962493896
+2025-01-11 19:33:18,905	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1500:  Training Loss: 2.127957344055176
+2025-01-11 19:33:41,270	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1600:  Training Loss: 1.9257891178131104
+2025-01-11 19:34:04,438	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1700:  Training Loss: 2.554138422012329
+2025-01-11 19:34:26,687	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1800:  Training Loss: 2.0585262775421143
+2025-01-11 19:34:48,028	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 1900:  Training Loss: 1.9858736991882324
+2025-01-11 19:35:10,238	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 2000:  Training Loss: 1.5564701557159424
+2025-01-11 19:35:32,239	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:239] Iter 2100:  Training Loss: 2.113098382949829
+2025-01-11 19:40:30,462	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.py:269] Validation Loss: {'rouge-1': 0.6346475548374565, 'rouge-2': 0.4497515426153631, 'rouge-l': 0.5592878043014434}
