@@ -300,8 +300,10 @@ if __name__ == '__main__':
     test_data = prepare_data(args, tokenizer)
 
     # step 4. load finetuned model
-    model_path = osp.join(args.model_dir, args.model_specific_dir)
-    model = torch.load(model_path, map_location=device)
+    # model_path = osp.join(args.model_dir, args.model_specific_dir)
+    # model = torch.load(model_path, map_location=device)
+    model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
+
 
     # step 5. predict
     res = []
