@@ -66,8 +66,9 @@ function model_train() {
   --batch_size 8 \
   --lr 2e-4 \
   --data_parallel False \
-  --max_len 512 \
-  --max_len_generate 40 
+  --max_len 1024 \
+  --max_len_generate 150 \
+  --stage one_stage
 }
 
 function main() {

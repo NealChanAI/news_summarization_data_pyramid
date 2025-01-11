@@ -63,8 +63,9 @@ function model_infer() {
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
   --batch_size 16 \
-  --max_len 512 \
-  --max_len_generate 40
+  --max_len 1024 \
+  --max_len_generate 150 \
+  --stage pretrain
 
 }
 

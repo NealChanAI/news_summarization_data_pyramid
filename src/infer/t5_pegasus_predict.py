@@ -225,12 +225,13 @@ def compute_rouges(sources, targets):
 def generate(test_data, model, tokenizer, args):
     gens, summaries = [], []
     with open(args.result_file, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.writer(f, delimiter='\t')
+        writer = csv.writer(f, delimiter='\u0001')
         model.eval()
         for feature in tqdm(test_data):
             raw_data = feature['raw_data']
             content = {k: v for k, v in feature.items() if k not in ['raw_data', 'title']}
             gen = model.generate(max_length=args.max_len_generate,
+                                 length_penalty=args.length_penalty,
                                  eos_token_id=tokenizer.sep_token_id,
                                  decoder_start_token_id=tokenizer.cls_token_id,
                                  **content)
@@ -271,7 +272,10 @@ def init_argument():
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of generated text')
+    parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
     parser.add_argument('--use_multiprocess', default=False, action='store_true')
+    parser.add_argument('--stage', type=str, default='one_stage',
+                        choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
 
     args = parser.parse_args()
     return args
@@ -284,6 +288,7 @@ def _log_args():
         log.logger.debug(f'{k}: {v}')
     log.logger.debug('')
 
+
 if __name__ == '__main__':
 
     # step 1. init argument
@@ -291,7 +296,7 @@ if __name__ == '__main__':
 
     # step 2. init log
     current_time = time_util.readable_time_string('%y%m%d%H%M%S')
-    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.predict.log')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.predict.{args.stage}.log')
     log.init_logger('train', LOG_FILE)
     _log_args()
 
@@ -300,10 +305,11 @@ if __name__ == '__main__':
     test_data = prepare_data(args, tokenizer)
 
     # step 4. load finetuned model
-    # model_path = osp.join(args.model_dir, args.model_specific_dir)
-    # model = torch.load(model_path, map_location=device)
-    model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
-
+    if args.stage.startswith('pretrain'):  # 加载预训练模型
+        model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
+    else:
+        model_path = osp.join(args.model_dir, args.model_specific_dir, args.stage)
+        model = torch.load(model_path, map_location=device)
 
     # step 5. predict
     res = []

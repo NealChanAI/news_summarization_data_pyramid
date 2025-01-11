@@ -250,6 +250,7 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
             content = {k: v.to(device) for k, v in feature.items() if k != 'title'}
             if args.data_parallel and torch.cuda.is_available():
                 gen = model.module.generate(max_length=args.max_len_generate,
+                                            length_penalty=args.length_penalty,
                                             eos_token_id=tokenizer.sep_token_id,
                                             decoder_start_token_id=tokenizer.cls_token_id,
                                             **content)
@@ -270,9 +271,9 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         if rouge_l > best:
             best = rouge_l
             if args.data_parallel and torch.cuda.is_available():
-                torch.save(model.module, os.path.join(args.model_dir, args.model_specific_dir))
+                torch.save(model.module, os.path.join(args.model_dir, args.model_specific_dir, args.stage))
             else:
-                torch.save(model, os.path.join(args.model_dir, args.model_specific_dir))
+                torch.save(model, os.path.join(args.model_dir, args.model_specific_dir, args.stage))
         # torch.save(model, os.path.join(args.model_dir, 'summary_model_epoch_{}'.format(str(epoch))))
 
 
@@ -290,6 +291,9 @@ def init_argument():
     parser.add_argument('--data_parallel', default=False)
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
+    parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
+    parser.add_argument('--stage', type=str, default='one_stage',
+                        choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
 
     args = parser.parse_args()
     return args
@@ -310,7 +314,7 @@ if __name__ == '__main__':
 
     # step 2. init log
     current_time = time_util.readable_time_string('%y%m%d%H%M%S')
-    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.train.log')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.train.{args.stage}.log')
     log.init_logger('train', LOG_FILE)
     _log_args()
 
@@ -321,10 +325,11 @@ if __name__ == '__main__':
 
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    # model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
-    model_path = os.path.join(args.model_dir, args.model_specific_dir)
-    model = torch.load(model_path)  # 加载训练好的模型
-    model.to(device)
+    if args.stage.startswith('one_stage'):  # 加载预训练模型
+        model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
+    else:  # 加载微调好的模型
+        model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage)
+        model = torch.load(model_path, map_location=device)
 
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
