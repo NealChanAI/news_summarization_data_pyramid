@@ -1,0 +1,24 @@
+2025-01-11 19:19:44,899	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:19:44,899	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:19:44,899	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:19:44,900	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:19:44,900	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-11 19:19:44,900	[INFO]	[algo_reco.train]	[log.py:51] ========== new log ==========
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[log.py:52] logfile is [/root/develop/news_summarization_data_pyramid/logs/t5_pegasus/250111191944.predict.pretrain.log]
+2025-01-11 19:19:44,900	[INFO]	[algo_reco.train]	[log.py:60] init logger done
+2025-01-11 19:19:44,900	[INFO]	[algo_reco.train]	[log.py:61] 
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:286] ===== input args =====
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] test_data: data/THUCNews/companies_news_info_v2.test.txt
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] result_file: data/THUCNews/companies_news_info_v2.test.direct_infer2.tsv
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] pretrain_model: /root/develop/news_summarization_data_pyramid/model/chinese_t5_pegasus_base_torch
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] model_dir: /root/develop/news_summarization_data_pyramid/model/saved_model
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] model_specific_dir: t5_pegasus
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] batch_size: 16
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] max_len: 1024
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] max_len_generate: 150
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] length_penalty: 1.2
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] use_multiprocess: False
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:288] stage: pretrain
+2025-01-11 19:19:44,900	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:289] 
+2025-01-11 19:20:06,315	[INFO]	[algo_reco.train]	[t5_pegasus_predict.py:246] {'rouge-1': 0.5136669856716655, 'rouge-2': 0.35147396990755864, 'rouge-l': 0.4564290635436114}
+2025-01-11 19:20:06,315	[INFO]	[algo_reco.train]	[t5_pegasus_predict.py:247] Done!

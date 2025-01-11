@@ -57,18 +57,20 @@ function model_train() {
   echo_info "========== model train..."
 
   python src/train/t5_pegasus_finetune.py \
-  --train_data data/THUCNews/companies_news_info_v2.train.txt \
-  --dev_data data/THUCNews/companies_news_info_v2.train.txt \
+  --train_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.train.txt \
+  --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.test.txt \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
   --num_epoch 20 \
-  --batch_size 8 \
+  --batch_size 4 \
   --lr 2e-4 \
   --data_parallel False \
   --max_len 1024 \
   --max_len_generate 150 \
   --stage one_stage
+  # --train_data data/THUCNews/companies_news_info_v2.train.txt \
+  # --dev_data data/THUCNews/companies_news_info_v2.train.txt \
 }
 
 function main() {
