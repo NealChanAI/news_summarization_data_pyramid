@@ -318,7 +318,7 @@ if __name__ == '__main__':
 
     # step 2. init log
     current_time = time_util.readable_time_string('%y%m%d%H%M%S')
-    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{current_time}.train.{args.stage}.log')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{args.version}.{args.stage}.train.{current_time}.log')
     log.init_logger('train', LOG_FILE)
     _log_args()
 
