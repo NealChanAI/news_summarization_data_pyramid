@@ -321,8 +321,11 @@ if __name__ == '__main__':
 
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = MT5ForConditionalGeneration \
-        .from_pretrained(args.pretrain_model).to(device)
+    # model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
+    model_path = os.path.join(args.model_dir, args.model_specific_dir)
+    model = torch.load(model_path)  # 加载训练好的模型
+    model.to(device)
+
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
         model = torch.nn.DataParallel(model, device_ids=device_ids)
