@@ -2,8 +2,8 @@
 # ===============================================================
 #
 #    @Create Author : chenyongming
-#    @Create Time   : 2024-12-18 16:48
-#    @Description   : 基于LLM的abstractive summary生成(包括chatGLM, Gemini, Azure openAI)
+#    @Create Time   : 2025-01-13 11:19
+#    @Description   : 对比损失数据增强
 #
 # ===============================================================
 
@@ -42,7 +42,7 @@ OPENAI_MODEL_VERSION = 'gpt-4o'
 MAX_TOKENS = 1024
 
 
-class PseudoSummaryAbstractive(object):
+class ContractiveDataGenerator(object):
     def __init__(self, model_type, output_file_name, input_file_name, start_idx=0):
         # 根据LLM模型区分API KEY和client
         self.mode_type = model_type
@@ -74,8 +74,8 @@ class PseudoSummaryAbstractive(object):
         self.start_idx = start_idx
         self.output_file_name = output_file_name
         self.input_file_name = input_file_name
-        with open('user_prompt.txt', 'r', encoding='utf-8') as f_usr, \
-            open('sys_prompt.txt', 'r', encoding='utf-8') as f_sys:
+        with open('user_prompt.contractive_data.txt', 'r', encoding='utf-8') as f_usr, \
+            open('sys_prompt.contractive_data.txt', 'r', encoding='utf-8') as f_sys:
             self.sys_prompt = f_sys.read()
             self.user_prompt = f_usr.read()
 
@@ -106,7 +106,7 @@ class PseudoSummaryAbstractive(object):
         _, res_dict = json_repair_util.try_parse_json_object(res)
 
         # 若value不为string类型, 则返回空串
-        if not isinstance(res_dict['summary'], str):
+        if not isinstance(res_dict['summary'], str):  # TODO: 待修改, 视乎prompt情况
             return {}
 
         return res_dict
@@ -247,7 +247,7 @@ if __name__ == '__main__':
     model_type = 'zhipu'
     input_file_name = 'sample_data_5000_not_shizheng.csv'
     output_file_name = f'abstractive_pseudo_summary_datasets_{model_type}.general_data.csv'
-    start_idx = 9579
+    start_idx = 1101
 
     extractor = PseudoSummaryAbstractive(model_type, output_file_name, input_file_name, start_idx)
     extractor.pseudo_summary_generate_workflow()
