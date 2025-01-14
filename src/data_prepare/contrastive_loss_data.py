@@ -193,14 +193,15 @@ class ContractiveDataGenerator(object):
         # 遍历文章, 获取pseudo summary, 每遍历一条就写一遍
         data_save_path = osp.join(ROOT_DIR, 'data', 'THUCNews', self.output_file_name)
         with open(data_save_path, mode='a', encoding='utf-8') as fw:
-            for i, content in enumerate(text_lst):
+            for i, line in enumerate(text_lst):
                 if i < self.start_idx:
                     continue
                 print(f'{readable_time_string("%Y%m%d %H:%M:%S")}: Processing No. {i+1}...')
+                summary, content = line.split('\u0001')
                 res_dict = generate(content, self.model_version)
                 print(f'-- {readable_time_string("%Y%m%d %H:%M:%S")}: {res_dict}')
                 if res_dict:
-                    fw.write('\u0001'.join([res_dict['rewrite'], content]))
+                    fw.write('\u0001'.join([summary, content, res_dict['rewrite']]))
                 else:
                     print(f'LLM生成结果异常, 输入文本为: {content}')
 
@@ -211,26 +212,6 @@ def parse_args():
     parser.add_argument('--model_type', type=str, choices=['zhipu', 'openai', 'gemini'], default='zhipu')
     args = parser.parse_args()
     return args
-
-
-def _test():
-    input_file_name = 'sample_data_10000_shizheng.csv'
-    output_file_name = 'abstractive_pseudo_summary_datasets.csv'
-
-    extractor_zhipu = PseudoSummaryAbstractive('zhipu', output_file_name, input_file_name)
-    extractor_gemini = PseudoSummaryAbstractive('gemini', output_file_name, input_file_name)
-    extractor_openai = PseudoSummaryAbstractive('openai', output_file_name, input_file_name)
-
-    text_lst = get_thunews_data(input_file_name)
-    content = text_lst[1]
-    print('智谱:')
-    print(extractor_zhipu.zhipu_generate(content, ZHIPU_MODEL_VERSION))
-    print('-' * 20)
-    print('GOOGLE:')
-    print(extractor_gemini.gemini_generate(content, GEMINI_MODEL_VERSION))
-    print('-' * 20)
-    print('OPENAI:')
-    print(extractor_openai.openai_generate(content, OPENAI_MODEL_VERSION))
 
 
 def _test2():

@@ -17,11 +17,10 @@ import torch
 import argparse
 import numpy as np
 from tqdm.auto import tqdm
-from utils import log
-from utils import time_util
+from utils import log  # 假设你有一个utils.py文件，包含log函数
+from utils import time_util # 假设你有一个utils.py文件，包含time_util函数
 from bert4torch.models import *
 from torch.utils.data import DataLoader, Dataset
-# from torch._six import container_abcs, string_classes, int_classes
 from collections.abc import Mapping, Sequence, Container
 string_classes = (str,)
 int_classes = (int,)
@@ -30,7 +29,8 @@ import random
 import sentence_transformers # 需要安装 sentence_transformers
 
 
-ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
+# 项目根目录
+ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))
 DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
 MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model')
 MODEL_SPECIFIC_PATH = 't5_pegasus'
@@ -45,7 +45,6 @@ def load_data(filename):
     D = []
     with open(filename, encoding='utf-8') as f:
         for l in f.readlines():
-            # cur = l.strip().split('\t')
             cur = l.strip().split('\u0001')
             if len(cur) == 2:
                 title, content = cur[0], cur[1]
@@ -53,58 +52,10 @@ def load_data(filename):
             elif len(cur) == 1:
                 content = cur[0]
                 D.append(content)
+            elif len(cur) == 3:
+                title, augmented_text, content = cur[0], cur[1], cur[2]
+                D.append((title, content, augmented_text))
     return D
-
-
-class ContrastiveLoss(nn.Module):
-    def __init__(self, temperature=0.1):
-        super().__init__()
-        self.temperature = temperature
-
-    def forward(self, z_i, z_j_all, labels):
-        # z_i: (batch_size, embedding_size)
-        # z_j_all: (batch_size, num_negatives, embedding_size)
-        # labels: (batch_size, )  1 for positive sample, 0 for negative samples
-
-        sim = torch.bmm(z_i.unsqueeze(1), z_j_all.transpose(1,2)) / self.temperature # (batch_size, 1+num_negatives)
-
-        sim = sim.squeeze(1) # (batch_size, 1+num_negatives)
-
-        # 对比学习损失
-        loss = F.cross_entropy(sim, labels)
-        return loss
-
-
-class AdaptiveKeywordAttention(nn.Module):
-    def __init__(self, embedding_size, hidden_size, vocab_size):
-        super().__init__()
-        self.keyword_weight_layer = nn.Sequential(
-            nn.Linear(embedding_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, 1)
-        )
-        self.embedding_size = embedding_size
-        self.vocab_size = vocab_size
-
-    def forward(self, input_ids, keyword_list, context_embeds):
-        # keyword_embeds: (batch_size, num_keywords, embedding_size)
-        # context_embeds: (batch_size, sequence_length, embedding_size)
-        keyword_embeds = self.get_keyword_embeds(input_ids, keyword_list)
-        # 计算关键词权重
-        keyword_weights = torch.sigmoid(self.keyword_weight_layer(keyword_embeds)).squeeze(-1)  # (batch_size, num_keywords)
-        keyword_weights = torch.softmax(keyword_weights, dim=-1) # 使用softmax进行归一化
-
-        # 将关键词权重与上下文向量进行融合
-        enhanced_context_embeds = context_embeds + torch.sum(keyword_embeds * keyword_weights.unsqueeze(-1).unsqueeze(-1), dim=1)
-        return enhanced_context_embeds
-
-
-    def get_keyword_embeds(self, input_ids, keyword_list):
-        batch_size = input_ids.shape[0]
-        keyword_ids = tokenizer.convert_tokens_to_ids(keyword_list) # 将关键词转换为ids
-        keyword_ids = torch.tensor(keyword_ids).unsqueeze(0).repeat(batch_size,1).to(input_ids.device) # 将ids转化为tensor，并且复制batch_size份
-        keyword_embeds = tokenizer.embeddings(keyword_ids) # 使用tokenizer的embedding层获得关键词的embedding
-        return keyword_embeds
 
 
 class T5PegasusTokenizer(BertTokenizer):
@@ -139,19 +90,25 @@ class KeyDataset(Dataset):
 
 def create_data(data, tokenizer, max_len=512, term='train'):
     """调用tokenizer.encode编码正文/标题，每条样本用dict表示数据域
+       增加了读取增强数据的功能
     """
     ret, flag = [], True
-    for title, content in data:
+    for item in data:
+        if term == 'three_stage' and len(item) == 3:  # 第三阶段，数据格式：(标题, 正文, 增强文本)
+            title, content, augmented_text = item
+            augmented_ids = tokenizer.encode(augmented_text, max_length=max_len, truncation='only_first')
+        else:
+            title, content = item
+            augmented_ids = None  # 第一、二阶段没有增强数据
         text_ids = tokenizer.encode(content, max_length=max_len, truncation='only_first')
-        if flag and term == 'train':
-            flag = False
-            # print(content)
         if term == 'train':
             summary_ids = tokenizer.encode(title, max_length=max_len, truncation='only_first')
             features = {'input_ids': text_ids,
                         'decoder_input_ids': summary_ids,
                         'attention_mask': [1] * len(text_ids),
-                        'decoder_attention_mask': [1] * len(summary_ids)
+                        'decoder_attention_mask': [1] * len(summary_ids),
+                        'content': content,
+                        'augmented_data': {'input_ids': augmented_ids, 'attention_mask': [1] * len(augmented_ids)} if augmented_ids else None
                         }
 
         elif term == 'dev':
@@ -194,8 +151,6 @@ def default_collate(batch):
     if isinstance(elem, torch.Tensor):
         out = None
         if torch.utils.data.get_worker_info() is not None:
-            # If we're in a background process, concatenate directly into a
-            # shared memory tensor to avoid an extra copy
             numel = sum([x.numel() for x in batch])
             storage = elem.storage()._new_shared(numel)
             out = elem.new(storage)
@@ -203,7 +158,6 @@ def default_collate(batch):
     elif elem_type.__module__ == 'numpy' and elem_type.__name__ != 'str_' \
             and elem_type.__name__ != 'string_':
         if elem_type.__name__ == 'ndarray' or elem_type.__name__ == 'memmap':
-            # array of string classes and object
             if np_str_obj_array_pattern.search(elem.dtype.str) is not None:
                 raise TypeError(default_collate_err_msg_format.format(elem.dtype))
             return default_collate([torch.as_tensor(b) for b in batch])
@@ -220,7 +174,6 @@ def default_collate(batch):
     elif isinstance(elem, tuple) and hasattr(elem, '_fields'):  # namedtuple
         return elem_type(*(default_collate(samples) for samples in zip(*batch)))
     elif isinstance(elem, Sequence):
-        # check to make sure that the elements in batch have consistent size
         it = iter(batch)
         elem_size = len(next(it))
         if not all(len(elem) == elem_size for elem in it):
@@ -272,18 +225,6 @@ def compute_rouges(sources, targets):
     return {k: v / len(targets) for k, v in scores.items()}
 
 
-def augment_data_gemini(text, prompt_template="请改写以下文本，使其更简洁，并使用更简单的语言：{text}"):
-    request = GenerateTextRequest(
-        model='models/gemini-pro',
-        prompt=prompt_template.format(text=text),
-        temperature=0.7,
-        max_output_tokens=256,
-    )
-    response = gemini_client.generate_text(request=request)
-    augmented_text = response.candidates[0].output
-    return augmented_text
-
-
 class ContrastiveLoss(nn.Module):
     def __init__(self, temperature=0.1):
         super().__init__()
@@ -296,36 +237,7 @@ class ContrastiveLoss(nn.Module):
         return loss
 
 
-class AdaptiveKeywordAttention(nn.Module):
-    def __init__(self, embedding_size, hidden_size, vocab_size):
-        super().__init__()
-        self.keyword_weight_layer = nn.Sequential(
-            nn.Linear(embedding_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, 1)
-        )
-        self.embedding_size = embedding_size
-        self.vocab_size = vocab_size
-
-    def forward(self, input_ids, keyword_list, context_embeds):
-        keyword_embeds = self.get_keyword_embeds(input_ids, keyword_list)
-        keyword_weights = torch.sigmoid(self.keyword_weight_layer(keyword_embeds)).squeeze(-1)
-        keyword_weights = torch.softmax(keyword_weights, dim=-1)
-        enhanced_context_embeds = context_embeds + torch.sum(keyword_embeds * keyword_weights.unsqueeze(-1).unsqueeze(-1), dim=1)
-        return enhanced_context_embeds
-
-
-    def get_keyword_embeds(self, input_ids, keyword_list):
-        batch_size = input_ids.shape[0]
-        keyword_ids = tokenizer.convert_tokens_to_ids(keyword_list)
-        keyword_ids = torch.tensor(keyword_ids).unsqueeze(0).repeat(batch_size, 1).to(input_ids.device)
-        keyword_embeds = tokenizer.embeddings(keyword_ids)
-        return keyword_embeds
-
-
-def train_model(model, adam, train_data, dev_data, tokenizer, device, args, contrastive_loss, keyword_attention):
-    # if not os.path.exists(args.model_dir):
-    #     os.mkdir(args.model_dir)
+def train_model(model, adam, train_data, dev_data, tokenizer, device, args, contrastive_loss):
     model_save_path = os.path.join(args.model_dir, args.model_specific_dir)
     if not os.path.exists(model_save_path):
         os.mkdir(model_save_path)
@@ -335,32 +247,32 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args, cont
         model.train()
         for i, cur in enumerate(tqdm(train_data, desc='Epoch {}:'.format(epoch))):
             cur = {k: v.to(device) for k, v in cur.items()}
-            # 领域关键词注意力机制
-            if args.stage != 'one_stage':
-                context_embeds = model.get_input_embeddings()(cur['input_ids'])
-                enhanced_embeds = keyword_attention(cur['input_ids'], keyword_list, context_embeds)
-                cur['inputs_embeds'] = enhanced_embeds
-                del cur['input_ids']
-
             # 对比学习
             if args.stage == 'three_stage':
-                aug_data = self.augment_data_gemini(cur)
-                z_i = model(**cur)[0].last_hidden_state[:, 0, :]
-                z_j_all = model(**aug_data)[0].last_hidden_state[:, 0, :]
+                aug_data = cur['augmented_data']
+                if aug_data:
+                    z_i = model(**cur)[0].last_hidden_state[:, 0, :]
+                    z_j_all = torch.cat([model(**aug_data)[0].last_hidden_state[:, 0, :], z_i], dim=0)
 
-                labels = torch.cat([torch.ones(len(z_i)), torch.zeros(len(z_i))], dim=0)
+                    labels = torch.cat([torch.ones(len(z_i)), torch.zeros(len(z_i))], dim=0)
 
-                contrastive_l = contrastive_loss(z_i, z_j_all, labels)
-                loss = loss_fct(prob, labels) + contrastive_l * 0.1
+                    contrastive_l = contrastive_loss(z_i, z_j_all, labels)
+                    loss = loss_fct(prob, labels) + contrastive_l * 0.1
+                else:
+                    loss = loss_fct(prob, labels)
             else:
                 loss = loss_fct(prob, labels)
-            if i % 100 == 0:
-                log.logger.info("Iter {}:  Training Loss: {}".format(i, loss.item()))
+
+            prob = model(**cur)[0]
+            mask = cur['decoder_attention_mask'][:, 1:].reshape(-1).bool()
+            prob = prob[:, :-1]
+            prob = prob.reshape((-1, prob.size(-1)))[mask]
+            labels = cur['decoder_input_ids'][:, 1:].reshape(-1)[mask]
+            loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
             loss.backward()
             adam.step()
             adam.zero_grad()
 
-        # 验证
         model.eval()
         gens = []
         summaries = []
@@ -380,8 +292,6 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args, cont
                                      **content)
             gen = tokenizer.batch_decode(gen, skip_special_tokens=True)
             gen = [item.replace(' ', '') for item in gen]
-            # print(title)
-            # print(gen)
             gens.extend(gen)
             summaries.extend(title)
         scores = compute_rouges(gens, summaries)
@@ -393,12 +303,14 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args, cont
                 torch.save(model.module, os.path.join(model_save_path, args.stage + '_' + args.version))
             else:
                 torch.save(model, os.path.join(model_save_path, args.stage + '_' + args.version))
-        # torch.save(model, os.path.join(args.model_dir, 'summary_model_epoch_{}'.format(str(epoch))))
+
 
 
 def init_argument():
     parser = argparse.ArgumentParser(description='t5-pegasus-chinese')
-    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'train.tsv'))
+    parser.add_argument('--train_data_stage1', default=osp.join(DATA_PATH, 'train_stage1.tsv'))
+    parser.add_argument('--train_data_stage2', default=osp.join(DATA_PATH, 'train_stage2.tsv'))
+    parser.add_argument('--train_data_stage3', default=osp.join(DATA_PATH, 'train_stage3.tsv'))
     parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'dev.tsv'))
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'saved_model'))
@@ -413,7 +325,7 @@ def init_argument():
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
     parser.add_argument('--version', type=str, default='v1', help='version')
     parser.add_argument('--stage', type=str, default='one_stage',
-                        choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
+                        choices=['one_stage', 'two_stage', 'three_stage'], help='training stage')
 
     args = parser.parse_args()
     return args
@@ -425,6 +337,7 @@ def _log_args():
     for k, v in args.__dict__.items():
         log.logger.debug(f'{k}: {v}')
     log.logger.debug('')
+
 
 
 if __name__ == '__main__':
@@ -440,16 +353,15 @@ if __name__ == '__main__':
 
     # step 3. prepare training data and validation data
     tokenizer = T5PegasusTokenizer.from_pretrained(args.pretrain_model)
-    train_data = prepare_data(args, args.train_data, tokenizer, term='train')
+    train_data_stage1 = prepare_data(args, args.train_data_stage1, tokenizer, term='train')
+    train_data_stage2 = prepare_data(args, args.train_data_stage2, tokenizer, term='train')
+    train_data_stage3 = prepare_data(args, args.train_data_stage3, tokenizer, term='train')
     dev_data = prepare_data(args, args.dev_data, tokenizer, term='dev')
 
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if args.stage.startswith('one_stage'):  # 加载预训练模型
-        model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
-    else:  # 加载微调好的模型
-        model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version)
-        model = torch.load(model_path, map_location=device)
+    model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
+    tokenizer.embeddings = model.get_input_embeddings()
 
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
@@ -458,10 +370,17 @@ if __name__ == '__main__':
     # step 5. finetune
     adam = torch.optim.Adam(model.parameters(), lr=args.lr)
     contrastive_loss = ContrastiveLoss()
-    keyword_list = ["营收", "利润", "净利润率", "研发投入", "市场份额", "战略合作", "并购", "投资", "技术创新", "数字化转型", "人工智能", "大数据", "云计算", "供应链", "国际化", "可持续发展", "ESG", "公司名称", "高管姓名", "产品名称", "项目名称", "政策", "法规", "竞争对手"]
-    adaptive_keyword_attention = AdaptiveKeywordAttention(model.config.d_model, 512, tokenizer.vocab_size)
     loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
 
-    args.stage = 'three_stage'
-    train_model(model, adam, train_data_stage3, dev_data, tokenizer, device, args, contrastive_loss, adaptive_keyword_attention)
+    # 第一阶段微调
+    args.stage = 'one_stage'
+    train_model(model, adam, train_data_stage1, dev_data, tokenizer, device, args, contrastive_loss)
+    model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version)
+    model = torch.load(model_path, map_location=device)
+    # 第二阶段微调
+    args.stage = 'two_stage'
+    train_model(model, adam, train_data_stage2, dev_data, tokenizer, device, args, contrastive_loss)
 
+    # 第三阶段微调
+    args.stage = 'three_stage'
+    train_model(model, adam, train_data_stage3, dev_data, tokenizer, device, args, contrastive_loss)
