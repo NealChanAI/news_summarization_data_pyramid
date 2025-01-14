@@ -106,6 +106,8 @@ class PseudoSummaryAbstractive(object):
         _, res_dict = json_repair_util.try_parse_json_object(res)
 
         # 若value不为string类型, 则返回空串
+        if not isinstance(res_dict, dict):
+            return {}
         if not isinstance(res_dict['summary'], str):
             return {}
 
@@ -247,7 +249,7 @@ if __name__ == '__main__':
     model_type = 'zhipu'
     input_file_name = 'sample_data_5000_not_shizheng.csv'
     output_file_name = f'abstractive_pseudo_summary_datasets_{model_type}.general_data.csv'
-    start_idx = 9579
+    start_idx = 39504
 
     extractor = PseudoSummaryAbstractive(model_type, output_file_name, input_file_name, start_idx)
     extractor.pseudo_summary_generate_workflow()

@@ -106,7 +106,9 @@ class ContractiveDataGenerator(object):
         _, res_dict = json_repair_util.try_parse_json_object(res)
 
         # 若value不为string类型, 则返回空串
-        if not isinstance(res_dict['summary'], str):  # TODO: 待修改, 视乎prompt情况
+        if not isinstance(res_dict, dict):
+            return {}
+        if not isinstance(res_dict['rewrite'], str):
             return {}
 
         return res_dict
@@ -198,7 +200,7 @@ class ContractiveDataGenerator(object):
                 res_dict = generate(content, self.model_version)
                 print(f'-- {readable_time_string("%Y%m%d %H:%M:%S")}: {res_dict}')
                 if res_dict:
-                    fw.write('\u0001'.join([res_dict['summary'], content]))
+                    fw.write('\u0001'.join([res_dict['rewrite'], content]))
                 else:
                     print(f'LLM生成结果异常, 输入文本为: {content}')
 
@@ -232,24 +234,24 @@ def _test():
 
 
 def _test2():
-    input_file_name = 'sample_data_10000_shizheng.csv'
-    output_file_name = 'abstractive_pseudo_summary_datasets.csv'
+    input_file_name = 'companies_news_info_v2.train.txt'
 
-    extractor_gemini = PseudoSummaryAbstractive('gemini', output_file_name, input_file_name)
+    extractor_gemini = ContractiveDataGenerator('gemini', output_file_name, input_file_name)
 
     text_lst = get_thunews_data(input_file_name)
-    content = text_lst[8]
-    extractor_gemini.gemini_generate(content, GEMINI_MODEL_VERSION)
+    content = text_lst[0]
+    res_dict = extractor_gemini.gemini_generate(content, GEMINI_MODEL_VERSION)
+    print(res_dict)
 
 
 if __name__ == '__main__':
     # init object
-    model_type = 'zhipu'
-    input_file_name = 'sample_data_5000_not_shizheng.csv'
-    output_file_name = f'abstractive_pseudo_summary_datasets_{model_type}.general_data.csv'
-    start_idx = 1101
+    model_type = 'gemini'
+    input_file_name = 'companies_news_info_v2.train.txt'
+    output_file_name = f'companies_news_info_v2.train.data_augmentation.{model_type}.txt'
+    start_idx = 0
 
-    extractor = PseudoSummaryAbstractive(model_type, output_file_name, input_file_name, start_idx)
+    extractor = ContractiveDataGenerator(model_type, output_file_name, input_file_name, start_idx)
     extractor.pseudo_summary_generate_workflow()
 
     # _test2()
