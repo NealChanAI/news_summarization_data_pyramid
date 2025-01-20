@@ -197,11 +197,13 @@ class ContractiveDataGenerator(object):
                 if i < self.start_idx:
                     continue
                 print(f'{readable_time_string("%Y%m%d %H:%M:%S")}: Processing No. {i+1}...')
-                summary, content = line.split('\u0001')
+                eles = line.split('\u0001')
+                summary, content = eles[0], eles[1]
+                content = content.replace('\n', '')
                 res_dict = generate(content, self.model_version)
                 print(f'-- {readable_time_string("%Y%m%d %H:%M:%S")}: {res_dict}')
                 if res_dict:
-                    fw.write('\u0001'.join([summary, content, res_dict['rewrite']]))
+                    fw.write('\u0001'.join([summary, content, res_dict['rewrite'].replace('\n', '')]) + '\n')
                 else:
                     print(f'LLM生成结果异常, 输入文本为: {content}')
 

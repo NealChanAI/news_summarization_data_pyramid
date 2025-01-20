@@ -36,6 +36,11 @@ MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model')
 MODEL_SPECIFIC_PATH = 't5_pegasus'
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
 LOG_DIR = osp.join(ROOT_DIR, "logs")  # 日志目录
+STAGE_MAP = {
+    'third_stage': 'second_stage',
+    'second_stage': 'first_stage',
+    'first_stage': 'pretrain'
+}
 
 
 def load_data(filename):
@@ -248,27 +253,20 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args, cont
         for i, cur in enumerate(tqdm(train_data, desc='Epoch {}:'.format(epoch))):
             cur = {k: v.to(device) for k, v in cur.items()}
             # 对比学习
-            if args.stage == 'three_stage':
-                aug_data = cur['augmented_data']
-                if aug_data:
-                    z_i = model(**cur)[0].last_hidden_state[:, 0, :]
-                    z_j_all = torch.cat([model(**aug_data)[0].last_hidden_state[:, 0, :], z_i], dim=0)
-
-                    labels = torch.cat([torch.ones(len(z_i)), torch.zeros(len(z_i))], dim=0)
-
-                    contrastive_l = contrastive_loss(z_i, z_j_all, labels)
-                    loss = loss_fct(prob, labels) + contrastive_l * 0.1
-                else:
-                    loss = loss_fct(prob, labels)
-            else:
-                loss = loss_fct(prob, labels)
+            aug_data = cur['augmented_data']
+            z_i = model(**cur)[0].last_hidden_state[:, 0, :]
+            z_j_all = torch.cat([model(**aug_data)[0].last_hidden_state[:, 0, :], z_i], dim=0)
+            labels = torch.cat([torch.ones(len(z_i)), torch.zeros(len(z_i))], dim=0)
+            contrastive_l = contrastive_loss(z_i, z_j_all, labels)
 
             prob = model(**cur)[0]
             mask = cur['decoder_attention_mask'][:, 1:].reshape(-1).bool()
             prob = prob[:, :-1]
             prob = prob.reshape((-1, prob.size(-1)))[mask]
-            labels = cur['decoder_input_ids'][:, 1:].reshape(-1)[mask]
+            labels_ce  = cur['decoder_input_ids'][:, 1:].reshape(-1)[mask]
             loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
+
+            loss = loss_fct(prob, labels_ce) + contrastive_l * 0.1
             loss.backward()
             adam.step()
             adam.zero_grad()
@@ -324,8 +322,7 @@ def init_argument():
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
     parser.add_argument('--version', type=str, default='v1', help='version')
-    parser.add_argument('--stage', type=str, default='one_stage',
-                        choices=['one_stage', 'two_stage', 'three_stage'], help='training stage')
+    parser.add_argument('--stage', type=str, default='third_stage', help='training stages')
 
     args = parser.parse_args()
     return args
@@ -353,15 +350,13 @@ if __name__ == '__main__':
 
     # step 3. prepare training data and validation data
     tokenizer = T5PegasusTokenizer.from_pretrained(args.pretrain_model)
-    train_data_stage1 = prepare_data(args, args.train_data_stage1, tokenizer, term='train')
-    train_data_stage2 = prepare_data(args, args.train_data_stage2, tokenizer, term='train')
-    train_data_stage3 = prepare_data(args, args.train_data_stage3, tokenizer, term='train')
+    train_data = prepare_data(args, args.train_data, tokenizer, term='train')
     dev_data = prepare_data(args, args.dev_data, tokenizer, term='dev')
 
-    # step 4. load pretrain model
+    # step 4. load model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
-    tokenizer.embeddings = model.get_input_embeddings()
+    model_path = os.path.join(args.model_dir, args.model_specific_dir, 'second_stage' + '_' + args.version)
+    model = torch.load(model_path, map_location=device)
 
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
@@ -370,17 +365,6 @@ if __name__ == '__main__':
     # step 5. finetune
     adam = torch.optim.Adam(model.parameters(), lr=args.lr)
     contrastive_loss = ContrastiveLoss()
-    loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
-
-    # 第一阶段微调
-    args.stage = 'one_stage'
-    train_model(model, adam, train_data_stage1, dev_data, tokenizer, device, args, contrastive_loss)
-    model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version)
-    model = torch.load(model_path, map_location=device)
-    # 第二阶段微调
-    args.stage = 'two_stage'
-    train_model(model, adam, train_data_stage2, dev_data, tokenizer, device, args, contrastive_loss)
 
     # 第三阶段微调
-    args.stage = 'three_stage'
     train_model(model, adam, train_data_stage3, dev_data, tokenizer, device, args, contrastive_loss)

@@ -106,6 +106,7 @@ def _content_clean_workflow(content):
     content = ''.join([sen.strip() for sen in sentences])
     return content
 
+
 def get_500_top_companies_news_info_v2(target_file, source_file='20250108-ABS.xlsx'):
     """对手工抽取的数据集进行清洗, 并存到目标文件中"""
     data_path = osp.join(ROOT_DIR, 'data', 'THUCNews')
