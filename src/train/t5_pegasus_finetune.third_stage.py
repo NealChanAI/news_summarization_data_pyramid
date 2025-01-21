@@ -26,7 +26,7 @@ string_classes = (str,)
 int_classes = (int,)
 from transformers import MT5ForConditionalGeneration, BertTokenizer
 import random
-import sentence_transformers # 需要安装 sentence_transformers
+# import sentence_transformers # 需要安装 sentence_transformers
 
 
 # 项目根目录
@@ -93,13 +93,14 @@ class KeyDataset(Dataset):
         return self.data[index]
 
 
-def create_data(data, tokenizer, max_len=512, term='train'):
+def create_data(stage, data, tokenizer, max_len=512, term='train'):
     """调用tokenizer.encode编码正文/标题，每条样本用dict表示数据域
        增加了读取增强数据的功能
     """
     ret, flag = [], True
     for item in data:
-        if term == 'three_stage' and len(item) == 3:  # 第三阶段，数据格式：(标题, 正文, 增强文本)
+        # print(f'Length of item: {len(item)}')
+        if args.stage == 'third_stage' and len(item) == 3:  # 第三阶段，数据格式：(标题, 正文, 增强文本)
             title, content, augmented_text = item
             augmented_ids = tokenizer.encode(augmented_text, max_length=max_len, truncation='only_first')
         else:
@@ -191,7 +192,7 @@ def prepare_data(args, data_path, tokenizer, term='train'):
     """准备batch数据
     """
     data = load_data(data_path)
-    data = create_data(data, tokenizer, args.max_len, term)
+    data = create_data(args.stage, data, tokenizer, args.max_len, term)
     data = KeyDataset(data)
     data = DataLoader(data, batch_size=args.batch_size, collate_fn=default_collate)
     return data
@@ -303,12 +304,9 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args, cont
                 torch.save(model, os.path.join(model_save_path, args.stage + '_' + args.version))
 
 
-
 def init_argument():
     parser = argparse.ArgumentParser(description='t5-pegasus-chinese')
-    parser.add_argument('--train_data_stage1', default=osp.join(DATA_PATH, 'train_stage1.tsv'))
-    parser.add_argument('--train_data_stage2', default=osp.join(DATA_PATH, 'train_stage2.tsv'))
-    parser.add_argument('--train_data_stage3', default=osp.join(DATA_PATH, 'train_stage3.tsv'))
+    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'train_data.tsv'))
     parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'dev.tsv'))
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'saved_model'))
@@ -367,4 +365,4 @@ if __name__ == '__main__':
     contrastive_loss = ContrastiveLoss()
 
     # 第三阶段微调
-    train_model(model, adam, train_data_stage3, dev_data, tokenizer, device, args, contrastive_loss)
+    train_model(model, adam, train_data, dev_data, tokenizer, device, args, contrastive_loss)
