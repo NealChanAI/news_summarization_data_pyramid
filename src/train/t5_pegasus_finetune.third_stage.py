@@ -17,8 +17,8 @@ import torch
 import argparse
 import numpy as np
 from tqdm.auto import tqdm
-from utils import log  # 假设你有一个utils.py文件，包含log函数
-from utils import time_util # 假设你有一个utils.py文件，包含time_util函数
+from utils import log
+from utils import time_util
 from bert4torch.models import *
 from torch.utils.data import DataLoader, Dataset
 from collections.abc import Mapping, Sequence, Container
@@ -26,7 +26,7 @@ string_classes = (str,)
 int_classes = (int,)
 from transformers import MT5ForConditionalGeneration, BertTokenizer
 import random
-# import sentence_transformers # 需要安装 sentence_transformers
+
 
 
 # 项目根目录
@@ -268,10 +268,13 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args, cont
             loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
 
             loss = loss_fct(prob, labels_ce) + contrastive_l * 0.1
+            if i % 100 == 0:
+                log.logger.info("Iter {}:  Training Loss: {}".format(i, loss.item()))
             loss.backward()
             adam.step()
             adam.zero_grad()
 
+        # 验证
         model.eval()
         gens = []
         summaries = []
