@@ -29,7 +29,7 @@ from transformers import MT5ForConditionalGeneration, BertTokenizer
 
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
-DATA_PATH = osp.join(ROOT_DIR, 'data', 'torch_data')
+DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews')
 MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model')
 MODEL_SPECIFIC_PATH = 't5_pegasus'
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_t5_pegasus_base_torch')
@@ -282,14 +282,14 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
 
 def init_argument():
     parser = argparse.ArgumentParser(description='t5-pegasus-chinese')
-    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'train.tsv'))
-    parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'dev.tsv'))
+    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'abstractive_pseudo_summary_datasets_zhipu.train.txt'))
+    parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'abstractive_pseudo_summary_datasets_zhipu.test.txt'))
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'saved_model'))
     parser.add_argument('--model_specific_dir', default=MODEL_SPECIFIC_PATH)
 
     parser.add_argument('--num_epoch', type=int, default=20, help='number of epoch')
-    parser.add_argument('--batch_size', type=int, default=16, help='batch size')
+    parser.add_argument('--batch_size', type=int, default=1, help='batch size')
     parser.add_argument('--lr', type=float, default=2e-4, help='learning rate')
     parser.add_argument('--data_parallel', default=False)
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
