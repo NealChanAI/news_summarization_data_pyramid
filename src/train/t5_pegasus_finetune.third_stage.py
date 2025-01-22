@@ -91,24 +91,45 @@ def create_data(data, tokenizer, max_len=512, term='train'):
     """调用tokenizer.encode编码正文/标题，每条样本用dict表示数据域
     """
     ret, flag = [], True
-    for title, content in data:
-        text_ids = tokenizer.encode(content, max_length=max_len, truncation='only_first')
-        print(f'length of text_ids: {len(text_ids)}')
-        if term == 'train':
-            summary_ids = tokenizer.encode(title, max_length=max_len, truncation='only_first')
-            print(f'length of summary_ids: {len(summary_ids)}')
-            features = {'input_ids': text_ids,
-                        'decoder_input_ids': summary_ids,
-                        'attention_mask': [1] * len(text_ids),
-                        'decoder_attention_mask': [1] * len(summary_ids)
-                        }
+    # for title, content in data:
+    for item in data:
+        if len(item) == 3:
+            title, content, augment_content = item
+            text_ids = tokenizer.encode(content, max_length=max_len, truncation='only_first')
+            augment_ids = tokenizer.encode(augment_content, max_length=max_len, truncation='only_first')
+            # print(f'length of text_ids: {len(text_ids)}')
+            if term == 'train':
+                summary_ids = tokenizer.encode(title, max_length=max_len, truncation='only_first')
+                # print(f'length of summary_ids: {len(summary_ids)}')
+                features = {'input_ids': text_ids,
+                            'augment_ids': augment_ids,
+                            'decoder_input_ids': summary_ids,
+                            'attention_mask': [1] * len(text_ids),
+                            'augment_mask': [1] * len(augment_ids),
+                            'decoder_attention_mask': [1] * len(summary_ids)
+                            }
 
-        elif term == 'dev':
-            features = {'input_ids': text_ids,
-                        'attention_mask': [1] * len(text_ids),
-                        'title': title
-                        }
+            elif term == 'dev':
+                features = {'input_ids': text_ids,
+                            'attention_mask': [1] * len(text_ids),
+                            'title': title
+                            }
+        elif len(item) == 2:
+            title, content = item
+            text_ids = tokenizer.encode(content, max_length=max_len, truncation='only_first')
+            if term == 'train':
+                summary_ids = tokenizer.encode(title, max_length=max_len, truncation='only_first')
+                features = {'input_ids': text_ids,
+                            'decoder_input_ids': summary_ids,
+                            'attention_mask': [1] * len(text_ids),
+                            'decoder_attention_mask': [1] * len(summary_ids)
+                            }
 
+            elif term == 'dev':
+                features = {'input_ids': text_ids,
+                            'attention_mask': [1] * len(text_ids),
+                            'title': title
+                            }
         ret.append(features)
     return ret
 
@@ -221,6 +242,24 @@ def compute_rouges(sources, targets):
     return {k: v / len(targets) for k, v in scores.items()}
 
 
+def contrastive_loss(embeddings, labels, temperature=0.05):
+    """计算对比损失"""
+    batch_size = embeddings.shape[0]  # (2 * b_size)
+    sim_matrix = torch.matmul(embeddings, embeddings.transpose(0, 1))  # 计算相似度矩阵 (batch_size, batch_size)
+    sim_matrix = sim_matrix / temperature  # 缩放相似度
+    sim_matrix = sim_matrix - torch.max(sim_matrix, dim=-1, keepdim=True)[0]  # 减去最大值，防止溢出
+    sim_matrix = torch.exp(sim_matrix)  # 指数化
+    mask = torch.eye(batch_size, dtype=torch.bool, device=embeddings.device)  # 对角线为True
+    sim_matrix = sim_matrix.masked_fill(mask, 0)  # 对角线置0
+    pos_mask = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()  # 正样本mask
+    pos_mask = pos_mask.masked_fill(mask, 0)  # 对角线置0
+    numerator = torch.sum(sim_matrix * pos_mask, dim=-1)  # 分子
+    denominator = torch.sum(sim_matrix, dim=-1)  # 分母
+    loss = -torch.log(numerator / denominator)  # 计算loss
+    loss = torch.mean(loss)  # 平均loss
+    return loss
+
+
 def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
     # if not os.path.exists(args.model_dir):
     #     os.mkdir(args.model_dir)
@@ -233,21 +272,34 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         model.train()
         for i, cur in enumerate(tqdm(train_data, desc='Epoch {}:'.format(epoch))):
             cur = {k: v.to(device) for k, v in cur.items()}
-            print(f'cur: {cur}')
-            print(f'cur["input_ids"] shape: {cur["input_ids"].shape}')
-            prob = model(**cur)[0]
-            print(f'prob: {prob}')
-            print(f'prob shape: {prob.shape}')
+            summary_inputs = {
+                'input_ids': cur['input_ids'],
+                'attention_mask': cur['attention_mask'],
+                'decoder_input_ids': cur['decoder_input_ids'],
+                'decoder_attention_mask': cur['decoder_attention_mask']
+            }
+            prob = model(**summary_inputs)[0]
             mask = cur['decoder_attention_mask'][:, 1:].reshape(-1).bool()
             prob = prob[:, :-1]
-            print(f'prob step 2 shape: {prob.shape}')
             prob = prob.reshape((-1, prob.size(-1)))[mask]
-            print(f'prob step 3 shape: {prob.shape}')
             labels = cur['decoder_input_ids'][:, 1:].reshape(-1)[mask]
             loss_fct = torch.nn.CrossEntropyLoss(ignore_index=-100)
-            loss = loss_fct(prob, labels)
-            if i % 100 == 0:
-                log.logger.info("Iter {}:  Training Loss: {}".format(i, loss.item()))
+            summary_loss = loss_fct(prob, labels)  # seq2seq loss
+
+            input_ids = cur['input_ids']
+            augment_ids = cur['augment_ids']
+            attention_mask = cur['attention_mask']
+            augment_mask = cur['augment_mask']
+            input_embeddings = model.encoder(input_ids, attention_mask=attention_mask)[0][:, 0, :]
+            augment_embeddings = model.encoder(augment_ids, attention_mask=augment_mask)[0][:, 0, :]
+            embeddings = torch.cat([input_embeddings, augment_embeddings], dim=0)
+            labels = torch.arange(input_ids.shape[0], device=device)
+            labels = torch.cat([labels, labels], dim=0)
+            contrastive_loss_val = contrastive_loss(embeddings, labels)
+            loss = summary_loss + contrastive_loss_val * args.contrastive_weight
+
+            if i % 10 == 0:
+                log.logger.info(f'Iter {i}:  Training Loss: {loss.item()}, Summary Loss: {summary_loss.item()}')
             loss.backward()
             adam.step()
             adam.zero_grad()
@@ -290,7 +342,7 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
 
 def init_argument():
     parser = argparse.ArgumentParser(description='t5-pegasus-chinese')
-    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'companies_news_info_v2.valid.txt'))
+    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'companies_news_info_v2.train.data_augmentation.gemini.txt'))
     parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'companies_news_info_v2.valid.txt'))
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'saved_model'))
@@ -306,6 +358,7 @@ def init_argument():
     parser.add_argument('--version', type=str, default='v1', help='version')
     parser.add_argument('--stage', type=str, default='one_stage',
                         choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
+    parser.add_argument('--contrastive_weight', type=float, default=0.1, help='contrastive loss weight')
 
     args = parser.parse_args()
     return args
@@ -337,11 +390,8 @@ if __name__ == '__main__':
 
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if args.stage.startswith('one_stage'):  # 加载预训练模型
-        model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
-    else:  # 加载微调好的模型
-        model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version)
-        model = torch.load(model_path, map_location=device)
+    model_path = os.path.join(args.model_dir, args.model_specific_dir, 'second_stage' + '_' + args.version)
+    model = torch.load(model_path, map_location=device)
 
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())

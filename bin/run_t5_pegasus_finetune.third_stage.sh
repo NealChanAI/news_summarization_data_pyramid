@@ -69,7 +69,8 @@ function model_train() {
   --max_len 1024 \
   --max_len_generate 150 \
   --version v1 \
-  --stage third_stage
+  --stage third_stage \
+  --contrastive_weight 0.1
 }
 
 function main() {
