@@ -2,8 +2,8 @@
 # ===============================================================
 #
 #    @Create Author : chenyongming
-#    @Create Time   : 2025-01-02 15:37
-#    @Description   : T5 PEGASUS Finetune torch脚本
+#    @Create Time   : 2025-01-22 17:32
+#    @Description   : 
 #
 # ===============================================================
 
@@ -26,7 +26,7 @@ from collections.abc import Mapping, Sequence, Container
 string_classes = (str,)
 int_classes = (int,)
 from transformers import MT5ForConditionalGeneration, BertTokenizer
-
+import torch.nn.functional as F
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews')
@@ -72,6 +72,40 @@ class T5PegasusTokenizer(BertTokenizer):
                 split_tokens.extend(super()._tokenize(text))
         return split_tokens
 
+
+class AdaptiveKeywordAttention(nn.Module):
+    def __init__(self, embedding_size, hidden_size, vocab_size):
+        super().__init__()
+        self.keyword_weight_layer = nn.Sequential(
+            nn.Linear(embedding_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, 1)
+        )
+        self.embedding_size = embedding_size
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size
+
+    def forward(self, input_ids, keyword_list, context_embeds):
+        # input_ids: (batch_size, seq_len)
+        # keyword_list: list
+        # context_embeds: (batch_size, seq_len, embedding_size)
+
+        keyword_embeds = self.get_keyword_embeds(input_ids, keyword_list) # (batch_size, num_keywords, embedding_size)
+        # 计算关键词权重
+        keyword_weights = torch.sigmoid(self.keyword_weight_layer(keyword_embeds)).squeeze(-1)  # (batch_size, num_keywords)
+        keyword_weights = torch.softmax(keyword_weights, dim=-1) # 使用softmax进行归一化
+
+        # 将关键词权重与上下文向量进行融合
+        enhanced_context_embeds = context_embeds + torch.sum(keyword_embeds * keyword_weights.unsqueeze(-1).unsqueeze(-1), dim=1)
+
+        return enhanced_context_embeds
+
+    def get_keyword_embeds(self, input_ids, keyword_list):
+        batch_size = input_ids.shape[0]
+        keyword_ids = tokenizer.convert_tokens_to_ids(keyword_list) # 将关键词转换为ids
+        keyword_ids = torch.tensor(keyword_ids).unsqueeze(0).repeat(batch_size,1).to(input_ids.device) # 将ids转化为tensor，并且复制batch_size份
+        keyword_embeds = model.shared(keyword_ids) # 使用模型的embedding层获得关键词的embedding
+        return keyword_embeds
 
 class KeyDataset(Dataset):
     def __init__(self, dict_data):
@@ -216,7 +250,7 @@ def compute_rouges(sources, targets):
     return {k: v / len(targets) for k, v in scores.items()}
 
 
-def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
+def train_model(model, adam, train_data, dev_data, tokenizer, device, args, adaptive_keyword_attention, keyword_list):
     # if not os.path.exists(args.model_dir):
     #     os.mkdir(args.model_dir)
     model_save_path = os.path.join(args.model_dir, args.model_specific_dir)
@@ -228,7 +262,13 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         model.train()
         for i, cur in enumerate(tqdm(train_data, desc='Epoch {}:'.format(epoch))):
             cur = {k: v.to(device) for k, v in cur.items()}
-            prob = model(**cur)[0]
+            #  加入关键词注意力机制
+            inputs_embeds = model.shared(cur['input_ids']) # 获取原始embedding
+            enhanced_embeds = adaptive_keyword_attention(cur['input_ids'], keyword_list, inputs_embeds) # 关键词注意力
+            encoder_outputs = model.encoder(inputs_embeds=enhanced_embeds, attention_mask = cur['attention_mask']) # 关键词注意力作用后的encoder
+            prob = model.decoder(encoder_outputs=encoder_outputs, attention_mask = cur['attention_mask'],
+                                 input_ids = cur['decoder_input_ids'], decoder_attention_mask = cur['decoder_attention_mask'])[0] # 解码器
+
             mask = cur['decoder_attention_mask'][:, 1:].reshape(-1).bool()
             prob = prob[:, :-1]
             prob = prob.reshape((-1, prob.size(-1)))[mask]
@@ -248,17 +288,22 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         for feature in tqdm(dev_data):
             title = feature['title']
             content = {k: v.to(device) for k, v in feature.items() if k != 'title'}
+            #  加入关键词注意力机制, 验证阶段也要加入
+            inputs_embeds = model.shared(content['input_ids'])  # 获取原始embedding
+            enhanced_embeds = adaptive_keyword_attention(content['input_ids'], keyword_list, inputs_embeds)  # 关键词注意力
+            encoder_outputs = model.encoder(inputs_embeds=enhanced_embeds,
+                                            attention_mask=content['attention_mask'])  # 关键词注意力作用后的encoder
             if args.data_parallel and torch.cuda.is_available():
-                gen = model.module.generate(max_length=args.max_len_generate,
+                gen = model.module.generate(encoder_outputs=encoder_outputs,
+		                            attention_mask=content['attention_mask'],
+					    max_length=args.max_len_generate,
                                             length_penalty=args.length_penalty,
                                             eos_token_id=tokenizer.sep_token_id,
-                                            decoder_start_token_id=tokenizer.cls_token_id,
-                                            **content)
+                                            decoder_start_token_id=tokenizer.cls_token_id)
             else:
-                gen = model.generate(max_length=args.max_len_generate,
+                gen = model.generate(encoder_outputs = encoder_outputs, attention_mask=content['attention_mask'], max_length=args.max_len_generate,
                                      eos_token_id=tokenizer.sep_token_id,
-                                     decoder_start_token_id=tokenizer.cls_token_id,
-                                     **content)
+                                     decoder_start_token_id=tokenizer.cls_token_id)
             gen = tokenizer.batch_decode(gen, skip_special_tokens=True)
             gen = [item.replace(' ', '') for item in gen]
             # print(title)
@@ -293,7 +338,7 @@ def init_argument():
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
     parser.add_argument('--version', type=str, default='v1', help='version')
-    parser.add_argument('--stage', type=str, default='first_stage',
+    parser.add_argument('--stage', type=str, default='second_stage',
                         choices=['pretrain', 'first_stage', 'second_stage', 'third_stage'], help='training stage')
 
     args = parser.parse_args()
@@ -327,6 +372,11 @@ if __name__ == '__main__':
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
+    #  定义关键词注意力机制
+    embedding_size = model.config.d_model
+    hidden_size = 512  # hidden size 可以自己调整
+    vocab_size = model.config.vocab_size
+    adaptive_keyword_attention = AdaptiveKeywordAttention(embedding_size, hidden_size, vocab_size).to(device)
 
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
@@ -334,4 +384,5 @@ if __name__ == '__main__':
 
     # step 5. finetune
     adam = torch.optim.Adam(model.parameters(), lr=args.lr)
-    train_model(model, adam, train_data, dev_data, tokenizer, device, args)
+    keyword_list = ["<sep>", "<pad>", "<cls>", "营收", "利润", "净利润率", "研发投入", "市场份额", "战略合作", "并购", "投资", "技术创新", "数字化转型", "人工智能", "大数据", "云计算", "供应链", "国际化", "可持续发展", "ESG", "公司名称", "高管姓名", "产品名称", "项目名称", "政策", "法规", "竞争对手"] # 关键词列表
+    train_model(model, adam, train_data, dev_data, tokenizer, device, args, adaptive_keyword_attention, keyword_list)
