@@ -254,7 +254,7 @@ def contrastive_loss(embeddings, labels, temperature=0.05):
     pos_mask = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()  # 正样本mask
     pos_mask = pos_mask.masked_fill(mask, 0)  # 对角线置0
     numerator = torch.sum(sim_matrix * pos_mask, dim=-1)  # 分子
-    denominator = torch.sum(sim_matrix, dim=-1)  # 分母
+    denominator = torch.sum(sim_matrix, dim=-1) + 1e-8 # 分母
     loss = -torch.log(numerator / denominator)  # 计算loss
     loss = torch.mean(loss)  # 平均loss
     return loss
@@ -296,11 +296,14 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
             labels = torch.arange(input_ids.shape[0], device=device)
             labels = torch.cat([labels, labels], dim=0)
             contrastive_loss_val = contrastive_loss(embeddings, labels)
-            loss = summary_loss + contrastive_loss_val * args.contrastive_weight
+            # print(f'args.contrastive_weight: {args.contrastive_weight} {type(args.contrastive_weight)}')
+            # loss = summary_loss + args.contrastive_weight * contrastive_loss_val
+            loss = summary_loss + contrastive_loss_val * 0.01
 
             if i % 10 == 0:
                 log.logger.info(f'Iter {i}:  Training Loss: {loss.item()}, Summary Loss: {summary_loss.item()}')
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # 梯度裁剪
             adam.step()
             adam.zero_grad()
 
@@ -351,7 +354,7 @@ def init_argument():
     parser.add_argument('--num_epoch', type=int, default=20, help='number of epoch')
     parser.add_argument('--batch_size', type=int, default=2, help='batch size')
     parser.add_argument('--lr', type=float, default=2e-4, help='learning rate')
-    parser.add_argument('--data_parallel', default=False)
+    parser.add_argument('--data_parallel', action='store_true', default=False)
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
@@ -392,7 +395,7 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model_path = os.path.join(args.model_dir, args.model_specific_dir, 'second_stage' + '_' + args.version)
     model = torch.load(model_path, map_location=device)
-
+    
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
         model = torch.nn.DataParallel(model, device_ids=device_ids)
