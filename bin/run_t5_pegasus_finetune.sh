@@ -56,7 +56,7 @@ function declare_variables() {
 function model_train() {
   echo_info "========== model train..."
 
-  python src/train/t5_pegasus_finetune.py \
+  python src/train/t5_pegasus_finetune.first_stage.py \
   --train_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.train.txt \
   --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.test.txt \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
@@ -65,7 +65,6 @@ function model_train() {
   --num_epoch 20 \
   --batch_size 4 \
   --lr 2e-4 \
-  --data_parallel False \
   --max_len 1024 \
   --max_len_generate 150 \
   --version v1 \

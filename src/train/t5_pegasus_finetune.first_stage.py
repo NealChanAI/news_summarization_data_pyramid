@@ -291,13 +291,13 @@ def init_argument():
     parser.add_argument('--num_epoch', type=int, default=20, help='number of epoch')
     parser.add_argument('--batch_size', type=int, default=1, help='batch size')
     parser.add_argument('--lr', type=float, default=2e-4, help='learning rate')
-    parser.add_argument('--data_parallel', default=False)
+    parser.add_argument('--data_parallel', action='store_true', default=False)
     parser.add_argument('--max_len', type=int, default=512, help='max length of inputs')
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
     parser.add_argument('--version', type=str, default='v1', help='version')
-    parser.add_argument('--stage', type=str, default='one_stage',
-                        choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
+    parser.add_argument('--stage', type=str, default='first_stage',
+                        choices=['pretrain', 'first_stage', 'second_stage', 'third_stage'], help='training stage')
 
     args = parser.parse_args()
     return args
@@ -329,11 +329,7 @@ if __name__ == '__main__':
 
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if args.stage.startswith('one_stage'):  # 加载预训练模型
-        model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
-    else:  # 加载微调好的模型
-        model_path = os.path.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version)
-        model = torch.load(model_path, map_location=device)
+    model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
 
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
