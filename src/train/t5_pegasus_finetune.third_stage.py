@@ -356,8 +356,8 @@ def init_argument():
     parser.add_argument('--max_len_generate', type=int, default=40, help='max length of outputs')
     parser.add_argument('--length_penalty', type=float, default=1.2, help='higher penalty causes longer summary')
     parser.add_argument('--version', type=str, default='v1', help='version')
-    parser.add_argument('--stage', type=str, default='one_stage',
-                        choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
+    parser.add_argument('--stage', type=str, default='third_stage',
+                        choices=['pretrain', 'first_stage', 'second_stage', 'third_stage'], help='training stage')
     parser.add_argument('--contrastive_weight', type=float, default=0.1, help='contrastive loss weight')
 
     args = parser.parse_args()
