@@ -1,0 +1,26 @@
+2025-01-24 17:14:48,663	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-24 17:14:48,663	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-24 17:14:48,663	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-24 17:14:48,663	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-24 17:14:48,663	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-01-24 17:14:48,663	[INFO]	[algo_reco.train]	[log.py:51] ========== new log ==========
+2025-01-24 17:14:48,663	[DEBUG]	[algo_reco.train]	[log.py:52] logfile is [D:\neal\develop\news_summarization_data_pyramid\logs\t5_pegasus\v1.second_stage.train.250124171448.log]
+2025-01-24 17:14:48,664	[INFO]	[algo_reco.train]	[log.py:60] init logger done
+2025-01-24 17:14:48,664	[INFO]	[algo_reco.train]	[log.py:61] 
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:400] ===== input args =====
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] train_data: D:\neal\develop\news_summarization_data_pyramid\data\THUCNews\companies_news_info_v2.valid.txt
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] dev_data: D:\neal\develop\news_summarization_data_pyramid\data\THUCNews\companies_news_info_v2.valid.txt
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] pretrain_model: D:\neal\develop\news_summarization_data_pyramid\model\chinese_t5_pegasus_base_torch
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] model_dir: D:\neal\develop\news_summarization_data_pyramid\model\saved_model
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] model_specific_dir: t5_pegasus
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] num_epoch: 20
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] batch_size: 2
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] lr: 0.0002
+2025-01-24 17:14:48,664	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] data_parallel: False
+2025-01-24 17:14:48,665	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] max_len: 512
+2025-01-24 17:14:48,665	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] max_len_generate: 40
+2025-01-24 17:14:48,665	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] length_penalty: 1.2
+2025-01-24 17:14:48,665	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] version: v1
+2025-01-24 17:14:48,665	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] stage: second_stage
+2025-01-24 17:14:48,665	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:402] keyword_attention_weight: 0.1
+2025-01-24 17:14:48,665	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.second_stage.py:403] 
