@@ -149,14 +149,16 @@ def train_test_split(file_path='companies_news_info_v2.txt', ratio=0.6):
     with open(train_file, mode='w', encoding='utf-8') as f_train, \
         open(test_file, mode='w', encoding='utf-8') as f_test:
         for _train in training_set:
-            f_train.write(_train)
+            if len(_train.split('\u0001')) == 2:
+                f_train.write(_train)
         for _test in testing_set:
-            f_test.write(_test)
+            if len(_test.split('\u0001')) == 2:
+                f_test.write(_test)
 
 
 def test():
     file_name = 'abstractive_pseudo_summary_datasets_zhipu.general_data.csv'
-    train_test_split(file_name, ratio=0.033)
+    train_test_split(file_name, ratio=0.967)
 
 
 if __name__ == '__main__':
