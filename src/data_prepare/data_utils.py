@@ -154,6 +154,10 @@ def train_test_split(file_path='companies_news_info_v2.txt', ratio=0.6):
             f_test.write(_test)
 
 
+def test():
+    file_name = 'abstractive_pseudo_summary_datasets_zhipu.general_data.csv'
+    train_test_split(file_name, ratio=0.033)
 
 
-
+if __name__ == '__main__':
+    test()
