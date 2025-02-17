@@ -65,8 +65,8 @@ function model_train() {
   --num_epoch 20 \
   --batch_size 4 \
   --lr 2e-4 \
-  --max_len 1024 \
-  --max_len_generate 150 \
+  --max_len 512 \
+  --max_len_generate 64 \
   --version v1 \
   --stage first_stage
   # --train_data data/THUCNews/companies_news_info_v2.train.txt \
