@@ -42,6 +42,7 @@ function declare_variables() {
   # data path
   PRETRAIN_MODEL_PATH="${ROOT_DIR}/model/chinese_t5_pegasus_base_torch"
   MODEL_SPECIFIC_PATH="${T5_PEGASUS}"
+  STAGE="$1"
   
   # print info
   echo_info """
@@ -50,6 +51,7 @@ function declare_variables() {
       PRETRAIN_MODEL_PATH is [${PRETRAIN_MODEL_PATH}]
       MODEL_SAVE_PATH is [${MODEL_SAVE_PATH}]
       MODEL_SPECIFIC_PATH is [${MODEL_SPECIFIC_PATH}]
+      STARGE is [${STAGE}]
       """
 }
 
@@ -66,7 +68,7 @@ function model_infer() {
   --max_len 1024 \
   --max_len_generate 150 \
   --version v1 \
-  --stage pretrain
+  --stage ${STAGE}
 
 }
 

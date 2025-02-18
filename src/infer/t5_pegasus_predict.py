@@ -309,7 +309,7 @@ if __name__ == '__main__':
     if args.stage.startswith('pretrain'):  # 加载预训练模型
         model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
     else:
-        model_path = osp.join(args.model_dir, args.model_specific_dir, args.stage)
+        model_path = osp.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version)
         print(f'推断使用模型路径为: {model_path}')
         model = torch.load(model_path, map_location=device)
 
