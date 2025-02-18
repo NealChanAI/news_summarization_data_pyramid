@@ -276,7 +276,7 @@ def init_argument():
     parser.add_argument('--use_multiprocess', default=False, action='store_true')
     parser.add_argument('--version', type=str, default='v1', help='version')
     parser.add_argument('--stage', type=str, default='one_stage',
-                        choices=['pretrain', 'one_stage', 'two_stage'], help='training stage')
+                        choices=['pretrain', 'first_stage', 'second_stage', 'third_stage'], help='training stage')
 
     args = parser.parse_args()
     return args
@@ -297,7 +297,7 @@ if __name__ == '__main__':
 
     # step 2. init log
     current_time = time_util.readable_time_string('%y%m%d%H%M%S')
-    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{args.version}.{args.stage}.train.{current_time}.log')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{args.version}.{args.stage}.predict.{current_time}.log')
     log.init_logger('train', LOG_FILE)
     _log_args()
 
@@ -310,6 +310,7 @@ if __name__ == '__main__':
         model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
     else:
         model_path = osp.join(args.model_dir, args.model_specific_dir, args.stage)
+        print(f'推断使用模型路径为: {model_path}')
         model = torch.load(model_path, map_location=device)
 
     # step 5. predict
