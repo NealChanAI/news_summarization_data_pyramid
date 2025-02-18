@@ -3,7 +3,7 @@
 #
 #    @Create Author : chenyongming
 #    @Create Time   : 2025-02-18 14:16
-#    @Description   : chinese-bart-base finetune
+#    @Description   : mt5-base finetune
 #
 # ===============================================================
 
@@ -15,9 +15,9 @@ import torch
 
 # 定义项目根目录和模型路径
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
-PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_bart_base')
-SAVED_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'chinese_bart_base_finetune')
-TRAIN_INFO_PATH = osp.join(ROOT_DIR, 'model', 'chinese_bart_base_train_info')
+PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base')
+SAVED_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_finetune')
+TRAIN_INFO_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_train_info')
 
 
 # 加载tokenizer和模型

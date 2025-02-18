@@ -3,7 +3,7 @@
 #
 #    @Create Author : chenyongming
 #    @Create Time   : 2025-02-18 15:20
-#    @Description   : chinese-bart-base predict
+#    @Description   : mt5-base predict
 #
 # ===============================================================
 
@@ -18,7 +18,7 @@ import rouge
 # 定义项目根目录和模型路径
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 # MODEL_PATH = osp.join(ROOT_DIR, 'model', 'bart_base')
-MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'chinese_bart_base_finetune')
+MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_finetune')
 
 
 # 加载tokenizer和模型
