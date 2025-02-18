@@ -9,7 +9,7 @@
 
 
 from datasets import Dataset
-from transformers import BertTokenizer, BartForConditionalGeneration
+from transformers import MT5Tokenizer, MT5ForConditionalGeneration
 from os import path as osp
 import torch
 import re
@@ -22,8 +22,8 @@ MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_finetune')
 
 
 # 加载tokenizer和模型
-tokenizer = BertTokenizer.from_pretrained(MODEL_SAVE_PATH)  # 使用 BertTokenizer
-model = BartForConditionalGeneration.from_pretrained(MODEL_SAVE_PATH)
+tokenizer = MT5Tokenizer.from_pretrained(MODEL_SAVE_PATH)  # 使用 BertTokenizer
+model = MT5ForConditionalGeneration.from_pretrained(MODEL_SAVE_PATH)
 model.to("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -76,7 +76,7 @@ def data_preprocess(file_path):
     data_dir = osp.join(ROOT_DIR, 'data', 'THUCNews')
     with open(osp.join(data_dir, file_path), mode='r', encoding='utf-8') as fr:
         lines = [line.strip() for line in fr.readlines()]
-        for line in lines:
+        for _, line in enumerate(lines):
             summary, text = line.split('\u0001')
             summary_lst.append(summary)
             text_lst.append(text)
@@ -130,13 +130,14 @@ def predict_workflow():
     test_data = data_preprocess(TEST_FILE_PATH)
     test_data = Dataset.from_dict(test_data)
     # 循环遍历评估数据集，生成摘要并计算 ROUGE 分数
-    for example in test_data:
+    for idx, example in enumerate(test_data):
+        print(f'Processing line {idx}')
         text = example["text"]
         reference = example["summary"]
 
         # 生成摘要
         predicted_summary = generate_summary(text, model, tokenizer)
-
+        print(predicted_summary)
         # 添加到列表
         predictions.append(predicted_summary)
         references.append(reference)
