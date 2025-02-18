@@ -30,7 +30,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from collections import Counter
 import sys
-sys.setrecursionlimit(5000)  # 增加递归深度限制，例如设置为 5000
+sys.setrecursionlimit(50000)  # 增加递归深度限制，例如设置为 5000
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews')
@@ -56,16 +56,6 @@ def load_data(filename):
                 content = cur[0]
                 D.append(content)
     return D
-
-
-def extract_keywords(text, topK=5):
-    """
-    简易关键词提取函数 (基于词频统计) - 降级方案
-    """
-    words = jieba.lcut(text) # 使用jieba基本分词
-    word_counts = Counter(words) # 统计词频
-    keywords = [word for word, count in word_counts.most_common(topK)] # 取Top K高频词作为关键词
-    return keywords
 
 
 class T5PegasusTokenizer(BertTokenizer):
@@ -167,7 +157,6 @@ def create_data(data, tokenizer, max_len=512, term='train'):
     ret = []
     for title, content in data:
         text_ids = tokenizer.encode(content, max_length=max_len, truncation='only_first')
-        # keywords = extract_keywords(content)
         keyword_tokens = ['关键词', '沃尔玛']  # 直接使用关键词tokens，而不是转换ids
         if term == 'train':
             summary_ids = tokenizer.encode(title, max_length=max_len, truncation='only_first')
@@ -432,7 +421,7 @@ if __name__ == '__main__':
 
     # step 5. finetune
     adam = torch.optim.Adam(model.parameters(), lr=args.lr)
-    # 初始化关键词注意力模块 (注意embedding_dim和hidden_dim需要根据你的模型配置)
+    # 初始化关键词注意力模块
     embedding_dim = model.shared.embedding_dim  # 从模型中获取embedding_dim
     hidden_dim = 768  # hidden_dim，可以根据需要调整，或者从model config中获取
     keyword_attention_module = AdaptiveKeywordAttention(embedding_dim, hidden_dim).to(device)  # 实例化关键词注意力模块
