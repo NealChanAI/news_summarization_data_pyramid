@@ -8,6 +8,8 @@ cd ${ROOT_DIR}
 source ${ROOT_DIR}/bin/conf.sh
 source ${ROOT_DIR}/bin/utils.sh
 
+STAGE_GLOABL=$1
+
 function check_args() {
   echo_info "========== check input args..."
   if [[ $# -lt 1 ]]; then
@@ -42,7 +44,7 @@ function declare_variables() {
   # data path
   PRETRAIN_MODEL_PATH="${ROOT_DIR}/model/chinese_t5_pegasus_base_torch"
   MODEL_SPECIFIC_PATH="${T5_PEGASUS}"
-  STAGE="$1"
+  STAGE=${STAGE_GLOABL}
   
   # print info
   echo_info """
