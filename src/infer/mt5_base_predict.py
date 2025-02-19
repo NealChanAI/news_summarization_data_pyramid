@@ -118,7 +118,8 @@ def generate_summary(text, model, tokenizer):
         summary_ids[0],
         skip_special_tokens=True
     )
-    summary = re.sub(r"\s+", "", summary)
+    # summary = re.sub(r"\s+", "", summary)
+    summary = summary.replace('<extra_id_0>', '')
     return summary
 
 
@@ -128,6 +129,13 @@ def predict_workflow():
     references = []
 
     test_data = data_preprocess(TEST_FILE_PATH)
+    # test_data = {
+    #     "text": [
+    #         "今天天气真好，阳光明媚，适合出去郊游。我们一家人去了公园，玩得很开心。",
+    #         "人工智能是未来的发展方向，自然语言处理是人工智能的重要组成部分。",
+    #     ],
+    #     "summary": ["今天去公园玩得很开心", "自然语言处理是人工智能的重要组成部分"],
+    # }
     test_data = Dataset.from_dict(test_data)
     # 循环遍历评估数据集，生成摘要并计算 ROUGE 分数
     for idx, example in enumerate(test_data):
@@ -137,7 +145,7 @@ def predict_workflow():
 
         # 生成摘要
         predicted_summary = generate_summary(text, model, tokenizer)
-        print(predicted_summary)
+        # print(predicted_summary)
         # 添加到列表
         predictions.append(predicted_summary)
         references.append(reference)

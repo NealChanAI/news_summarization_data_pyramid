@@ -40,7 +40,7 @@ function prepare_python_env() {
 
 function declare_variables() {
   # data path
-  PRETRAIN_MODEL_PATH="${ROOT_DIR}/model/chinese_t5_pegasus_base_torch"
+  PRETRAIN_MODEL_PATH="${ROOT_DIR}/model/chinese_bart_base"
   MODEL_SPECIFIC_PATH="${T5_PEGASUS}"
   
   # print info
@@ -56,26 +56,13 @@ function declare_variables() {
 function model_train() {
   echo_info "========== model train..."
 
-  python src/train/t5_pegasus_finetune.third_stage.py \
-  --train_data data/THUCNews/companies_news_info_v2.train.data_augmentation.gemini.txt \
-  --dev_data data/THUCNews/companies_news_info_v2.valid.txt \
-  --pretrain_model ${PRETRAIN_MODEL_PATH} \
-  --model_dir ${MODEL_SAVE_PATH} \
-  --model_specific_dir ${MODEL_SPECIFIC_PATH} \
-  --num_epoch 20 \
-  --batch_size 2 \
-  --lr 2e-4 \
-  --max_len 1024 \
-  --max_len_generate 150 \
-  --version v1 \
-  --stage third_stage \
-  --contrastive_weight 0.1
+  python src/train/bart_base_finetune.py
 }
 
 function main() {
   echo_info "==================== start model train script..."
 #  check_args "$@"
-  declare_variables
+#  declare_variables
   prepare_python_env
 
   time_diff model_train
