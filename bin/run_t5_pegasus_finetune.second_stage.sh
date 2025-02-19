@@ -58,7 +58,7 @@ function model_train() {
 
   python src/train/t5_pegasus_finetune.second_stage.py \
   --train_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.train.txt \
-  --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.train.txt \
+  --dev_data data/THUCNews/abstractive_pseudo_summary_datasets_zhipu.test.txt \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \

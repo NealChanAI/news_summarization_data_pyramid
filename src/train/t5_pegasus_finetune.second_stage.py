@@ -313,8 +313,8 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
 
 def init_argument():
     parser = argparse.ArgumentParser(description='t5-pegasus-chinese')
-    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'companies_news_info_v2.train.txt'))
-    parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'companies_news_info_v2.valid.txt'))
+    parser.add_argument('--train_data', default=osp.join(DATA_PATH, 'abstractive_pseudo_summary_datasets_zhipu.train.txt:'))
+    parser.add_argument('--dev_data', default=osp.join(DATA_PATH, 'abstractive_pseudo_summary_datasets_zhipu.test.txt:'))
     parser.add_argument('--pretrain_model', default=PRETRAIN_MODEL_PATH)
     parser.add_argument('--model_dir', default=osp.join(MODEL_SAVE_PATH, 'saved_model'))
     parser.add_argument('--model_specific_dir', default=MODEL_SPECIFIC_PATH)
