@@ -360,7 +360,8 @@ if __name__ == '__main__':
 
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
+    model_path = os.path.join(args.model_dir, args.model_specific_dir, 'second_stage' + '_' + args.version)
+    model = torch.load(model_path, map_location=device)
 
     if args.data_parallel and torch.cuda.is_available():
         device_ids = range(torch.cuda.device_count())
