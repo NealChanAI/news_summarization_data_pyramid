@@ -63,8 +63,8 @@ function model_train() {
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
   --num_epoch 20 \
-  --batch_size 2 \
-  --lr 2e-4 \
+  --batch_size 1 \
+  --lr 2e-5 \
   --max_len 1024 \
   --max_len_generate 150 \
   --version v1 \
