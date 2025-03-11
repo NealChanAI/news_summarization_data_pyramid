@@ -136,7 +136,6 @@ class TestDataLLMInfer(object):
             return {}
 
         res = response.choices[0].message.content
-        print(res)
         _, res_dict = json_repair_util.try_parse_json_object(res)
 
         # 若value不为string类型, 则返回空串
@@ -274,7 +273,5 @@ if __name__ == '__main__':
     output_file_name = f'companies_news_info_v2.test.llm_infer.txt'
 
     inferor = TestDataLLMInfer(model_type, output_file_name, input_file_name)
-    # inferor.pseudo_summary_generate_workflow()
+    inferor.pseudo_summary_generate_workflow()
     inferor._compute_rouges()
-
-    # _test2()
