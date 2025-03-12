@@ -1,0 +1,55 @@
+text length and compress ratio analysis
+
+summary length
+mean     122.443548
+std       38.530666
+min       39.000000
+25%       93.000000
+50%      122.500000
+75%      148.250000
+max      245.000000
+
+text length
+mean      709.758065
+std       573.299017
+min       115.000000
+25%       307.250000
+50%       479.000000
+75%       921.500000
+max      3564.00000
+
+compress ratio
+mean       0.262674
+std        0.159976
+min        0.027203
+25%        0.137267
+50%        0.234513
+75%        0.361709
+max        0.775510
+
+
+keyword intersection analysis
+count 248.000000
+mean  0.462097
+std 0.171014
+min 0.000000
+25% 0.300000
+50% 0.500000
+75% 0.600000
+max 0.900000
+
+
+wordcloud:
+Done 
+
+NER:
+not reasonal
+
+
+摘要句在原文中的位置:
+分布图输出
+
+
+
+Textrank
+{'rouge-1': 0.6095464052107772, 'rouge-2': 0.46495506973191275, 'rouge-l': 0.5372118493354643}
