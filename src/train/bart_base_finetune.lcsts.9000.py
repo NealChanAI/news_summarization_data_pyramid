@@ -110,7 +110,7 @@ def training_workflow():
         learning_rate=5e-5,  # 学习率
         per_device_train_batch_size=4,  # 训练 batch size
         per_device_eval_batch_size=4,  # 评估 batch size
-        num_train_epochs=3,  # 训练 epoch 数
+        num_train_epochs=20,  # 训练 epoch 数
         weight_decay=0.01,  # weight decay
         save_total_limit=3,  # 最多保存的模型数量
         # predict_with_generate=True,  # 使用 generate 方法进行预测

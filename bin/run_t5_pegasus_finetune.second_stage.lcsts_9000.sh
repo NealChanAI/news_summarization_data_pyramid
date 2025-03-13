@@ -57,16 +57,16 @@ function model_train() {
   echo_info "========== model train..."
 
   python src/train/t5_pegasus_finetune.second_stage.lcsts.py \
-  --train_data data/lcsts_data/lcsts_train_formatted.9000.csv \
+  --train_data data/lcsts_data/lcsts_train_formatted.9000_bak.csv \
   --dev_data data/lcsts_data/lcsts_train_formatted.1000.csv \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
   --num_epoch 3 \
-  --batch_size 4 \
+  --batch_size 16 \
   --lr 2e-4 \
   --max_len 1024 \
-  --max_len_generate 150 \
+  --max_len_generate 68 \
   --version v1 \
   --stage second_stage
 }

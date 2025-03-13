@@ -1,0 +1,25 @@
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:51] ========== new log ==========
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[log.py:52] logfile is [/root/news_summarization_data_pyramid/logs/t5_pegasus/v1.second_stage.predict.250313233837.lcsts_stage2_9000.log]
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:60] init logger done
+2025-03-13 23:38:37,613	[INFO]	[algo_reco.train]	[log.py:61] 
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:292] ===== input args =====
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] test_data: data/lcsts_data/lcsts_val_formatted.csv
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] result_file: data/lcsts_data/lcsts_val_formatted.second_stage_infer.lcsts_9000.csv
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] pretrain_model: /root/news_summarization_data_pyramid/model/chinese_t5_pegasus_base_torch
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] model_dir: /root/news_summarization_data_pyramid/model/saved_model
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] model_specific_dir: t5_pegasus
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] batch_size: 16
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] max_len: 1024
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] max_len_generate: 150
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] length_penalty: 1.2
+2025-03-13 23:38:37,613	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] use_multiprocess: False
+2025-03-13 23:38:37,614	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] version: v1
+2025-03-13 23:38:37,614	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:294] stage: second_stage
+2025-03-13 23:38:37,614	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:295] 
+2025-03-13 23:41:07,125	[INFO]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:251] {'rouge-1': 0.35693886375430095, 'rouge-2': 0.21935298733216735, 'rouge-l': 0.3239810640596545}
+2025-03-13 23:41:07,125	[INFO]	[algo_reco.train]	[t5_pegasus_predict.second_stage.lcsts_9000.py:252] Done!
