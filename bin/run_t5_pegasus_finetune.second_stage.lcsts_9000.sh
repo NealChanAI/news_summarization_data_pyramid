@@ -62,7 +62,7 @@ function model_train() {
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
-  --num_epoch 20 \
+  --num_epoch 3 \
   --batch_size 4 \
   --lr 2e-4 \
   --max_len 1024 \
