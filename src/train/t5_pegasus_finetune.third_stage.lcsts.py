@@ -394,7 +394,7 @@ if __name__ == '__main__':
 
     # step 4. load pretrain model
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model_path = os.path.join(args.model_dir, args.model_specific_dir, 'third_stage' + '_' + args.version)  # todo: 待定
+    model_path = os.path.join(args.model_dir, args.model_specific_dir, 'second_stage' + '_' + args.version + '_' + 'lcsts_stage2')
     model = torch.load(model_path, map_location=device)
 
     if args.data_parallel and torch.cuda.is_available():
