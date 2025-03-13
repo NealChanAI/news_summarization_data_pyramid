@@ -70,7 +70,7 @@ function model_infer() {
   --max_len 1024 \
   --max_len_generate 150 \
   --version v1 \
-  --stage second_stage
+  --stage third_stage
 
 }
 
