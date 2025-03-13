@@ -73,7 +73,7 @@ def data_preprocess(file_path):
         return
 
     text_lst, summary_lst = [], []
-    data_dir = osp.join(ROOT_DIR, 'data', 'THUCNews')
+    data_dir = osp.join(ROOT_DIR, 'data', 'lcsts_data')
     with open(osp.join(data_dir, file_path), mode='r', encoding='utf-8') as fr:
         lines = [line.strip() for line in fr.readlines()]
         for line in lines:
@@ -157,5 +157,5 @@ def tmp():
 
 
 if __name__ == '__main__':
-    TEST_FILE_PATH = 'companies_news_info_v2.test.txt'  # 测试数据集
+    TEST_FILE_PATH = 'lcsts_val_formatted.csv'  # 测试数据集
     predict_workflow()
