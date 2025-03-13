@@ -337,9 +337,9 @@ def train_model(model, adam, train_data, dev_data, tokenizer, device, args):
         if rouge_l > best:
             best = rouge_l
             if args.data_parallel and torch.cuda.is_available():
-                torch.save(model.module, os.path.join(model_save_path, args.stage + '_' + args.version + 'lcsts_stage3'))
+                torch.save(model.module, os.path.join(model_save_path, args.stage + '_' + args.version + '_' + 'lcsts_stage3'))
             else:
-                torch.save(model, os.path.join(model_save_path, args.stage + '_' + args.version + 'lcsts_stage3'))
+                torch.save(model, os.path.join(model_save_path, args.stage + '_' + args.version + '_' + 'lcsts_stage3'))
         # torch.save(model, os.path.join(args.model_dir, 'summary_model_epoch_{}'.format(str(epoch))))
 
 
