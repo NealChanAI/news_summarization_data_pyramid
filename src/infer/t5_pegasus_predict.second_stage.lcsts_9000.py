@@ -302,7 +302,7 @@ if __name__ == '__main__':
 
     # step 2. init log
     current_time = time_util.readable_time_string('%y%m%d%H%M%S')
-    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{args.version}.{args.stage}.predict.{current_time}.lcsts.log')
+    LOG_FILE = osp.join(LOG_DIR, args.model_specific_dir, f'{args.version}.{args.stage}.predict.{current_time}.lcsts_stage2_9000.log')
     log.init_logger('train', LOG_FILE)
     _log_args()
 
@@ -314,7 +314,7 @@ if __name__ == '__main__':
     if args.stage.startswith('pretrain'):  # 加载预训练模型
         model = MT5ForConditionalGeneration.from_pretrained(args.pretrain_model).to(device)
     else:
-        model_path = osp.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version + 'lcsts')
+        model_path = osp.join(args.model_dir, args.model_specific_dir, args.stage + '_' + args.version + '_' + 'lcsts_stage2')
         print(f'推断使用模型路径为: {model_path}')
         model = torch.load(model_path, map_location=device)
 

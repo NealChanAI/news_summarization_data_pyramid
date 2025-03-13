@@ -60,9 +60,9 @@ function declare_variables() {
 function model_infer() {
   echo_info "========== model infer..."
 
-  python src/infer/t5_pegasus_predict.lcsts.py \
+  python src/infer/t5_pegasus_predict.second_stage.lcsts_9000.py \
   --test_data data/lcsts_data/lcsts_val_formatted.csv \
-  --result_file data/lcsts_data/lcsts_val_formatted.llm_infer.csv \
+  --result_file data/lcsts_data/lcsts_val_formatted.second_stage_infer.lcsts_9000.csv \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
@@ -70,7 +70,7 @@ function model_infer() {
   --max_len 1024 \
   --max_len_generate 150 \
   --version v1 \
-  --stage ${STAGE}
+  --stage second_stage
 
 }
 
