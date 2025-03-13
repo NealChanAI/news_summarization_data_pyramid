@@ -29,6 +29,7 @@ from multiprocessing import Pool, Process
 import pandas as pd
 import numpy as np
 import rouge
+import time
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -230,6 +231,7 @@ def generate(test_data, model, tokenizer, args):
         for feature in tqdm(test_data):
             raw_data = feature['raw_data']
             content = {k: v for k, v in feature.items() if k not in ['raw_data', 'title']}
+            start_time = time.time()
             gen = model.generate(max_length=args.max_len_generate,
                                  length_penalty=args.length_penalty,
                                  eos_token_id=tokenizer.sep_token_id,
@@ -237,6 +239,9 @@ def generate(test_data, model, tokenizer, args):
                                  **content)
             gen = tokenizer.batch_decode(gen, skip_special_tokens=True)
             gen = [item.replace(' ', '') for item in gen]
+            end_time = time.time()
+            execution_time = start_time - end_time
+            print(f"函数执行时间: {execution_time:.4f} 秒")
             writer.writerows(zip(gen, raw_data))
             gens.extend(gen)
             if 'title' in feature:
