@@ -65,5 +65,6 @@ if __name__ == '__main__':
     # download_huggingface_data('test')
     # format_infer_dataset('train')
     # format_infer_dataset('validation')
-    dataset_sample('lcsts_train_formatted.csv', 150)
-    dataset_sample('lcsts_val_formatted.csv', 100)
+    # dataset_sample('lcsts_train_formatted.csv', 150)
+    # dataset_sample('lcsts_val_formatted.csv', 100)
+    dataset_sample('lcsts_train_formatted.csv', 10000)
