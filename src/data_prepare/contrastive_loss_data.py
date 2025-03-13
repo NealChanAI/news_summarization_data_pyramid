@@ -8,8 +8,6 @@
 # ===============================================================
 
 
-import pandas as pd
-import numpy as np
 import os
 from os import path as osp
 from zhipuai import core as zhipu_core
@@ -25,7 +23,7 @@ from utils.token_utils import num_tokens_from_string
 from utils.time_util import readable_time_string
 from utils import json_repair_util
 from utils.decorator_utils import retry_with_exponential_backoff
-from data_utils import get_thunews_data
+# from data_utils import get_thunews_data
 import json
 import argparse
 import logging
@@ -187,11 +185,14 @@ class ContractiveDataGenerator(object):
             generate = self.openai_generate
 
         # 获取数据集
-        text_lst = get_thunews_data(self.input_file_name)
-        print(f'Length of file lines: {len(text_lst)}')
+        # text_lst = get_thunews_data(self.input_file_name)
+        # print(f'Length of file lines: {len(text_lst)}')
+        with open(osp.join(ROOT_DIR, 'data', 'lcsts_data', self.input_file_name), 'r', encoding='utf-8') as fr:
+            lines = fr.readlines()
+            text_lst = [line.strip() for line in lines]
 
         # 遍历文章, 获取pseudo summary, 每遍历一条就写一遍
-        data_save_path = osp.join(ROOT_DIR, 'data', 'THUCNews', self.output_file_name)
+        data_save_path = osp.join(ROOT_DIR, 'data', 'lcsts_data', self.output_file_name)
         with open(data_save_path, mode='a', encoding='utf-8') as fw:
             for i, line in enumerate(text_lst):
                 if i < self.start_idx:
@@ -230,9 +231,9 @@ def _test2():
 if __name__ == '__main__':
     # init object
     model_type = 'gemini'
-    input_file_name = 'companies_news_info_v2.train.txt'
-    output_file_name = f'companies_news_info_v2.train.data_augmentation.{model_type}.txt'
-    start_idx = 0
+    input_file_name = 'lcsts_train_formatted.130.csv'
+    output_file_name = f'lcsts_train_formatted.150.data_augmentation.{model_type}.csv'
+    start_idx = 60
 
     extractor = ContractiveDataGenerator(model_type, output_file_name, input_file_name, start_idx)
     extractor.pseudo_summary_generate_workflow()

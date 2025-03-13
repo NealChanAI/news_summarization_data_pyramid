@@ -10,6 +10,7 @@
 
 from datasets import load_dataset
 from os import path as osp
+import random
 
 
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
@@ -38,9 +39,31 @@ def format_infer_dataset(data_type):
         fw.writelines('\n'.join(res))
 
 
-if __name__ == '__main__':
-    download_huggingface_data('train')
-    download_huggingface_data('validation')
-    download_huggingface_data('test')
-    format_infer_dataset('validation')
+def dataset_sample(file_path, num_sample):
+    """从数据集集中随机采样"""
+    data_path = osp.join(ROOT_DIR, 'data', 'lcsts_data', file_path)
+    output_train_path = data_path[:-4] + f'.{num_sample}' + data_path[-4:]
 
+    # 读取所有行
+    with open(data_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+    lines = [line.strip() for line in lines]
+
+    # 随机采样
+    random.seed(1024)
+    sampled_lines = random.sample(lines, num_sample)
+
+    with open(output_train_path, 'w', encoding='utf-8') as f_train:
+        f_train.writelines('\n'.join(sampled_lines))
+
+
+
+if __name__ == '__main__':
+    # download_huggingface_data('train')
+    # download_huggingface_data('validation')
+    # download_huggingface_data('test')
+    # format_infer_dataset('train')
+    # format_infer_dataset('validation')
+    dataset_sample('lcsts_train_formatted.csv', 150)
+    dataset_sample('lcsts_val_formatted.csv', 100)

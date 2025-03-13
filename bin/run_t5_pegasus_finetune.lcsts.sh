@@ -1,5 +1,5 @@
 #!/bin/bash
-# 模型推断
+# 模型训练-第三阶段
 
 set -eu
 
@@ -7,8 +7,6 @@ ROOT_DIR=$(readlink -f $(dirname $(readlink -f $0))/../)
 cd ${ROOT_DIR}
 source ${ROOT_DIR}/bin/conf.sh
 source ${ROOT_DIR}/bin/utils.sh
-
-STAGE_GLOABL=$1
 
 function check_args() {
   echo_info "========== check input args..."
@@ -44,7 +42,6 @@ function declare_variables() {
   # data path
   PRETRAIN_MODEL_PATH="${ROOT_DIR}/model/chinese_t5_pegasus_base_torch"
   MODEL_SPECIFIC_PATH="${T5_PEGASUS}"
-  STAGE=${STAGE_GLOABL}
   
   # print info
   echo_info """
@@ -53,34 +50,35 @@ function declare_variables() {
       PRETRAIN_MODEL_PATH is [${PRETRAIN_MODEL_PATH}]
       MODEL_SAVE_PATH is [${MODEL_SAVE_PATH}]
       MODEL_SPECIFIC_PATH is [${MODEL_SPECIFIC_PATH}]
-      STARGE is [${STAGE}]
       """
 }
 
-function model_infer() {
-  echo_info "========== model infer..."
+function model_train() {
+  echo_info "========== model train..."
 
-  python src/infer/t5_pegasus_predict.lcsts.py \
-  --test_data data/lcsts_data/lcsts_val_formatted.csv \
-  --result_file data/lcsts_data/lcsts_val_formatted.llm_infer.csv \
+  python src/train/t5_pegasus_finetune.lcsts.py \
+  --train_data data/lcsts_data/lcsts_train_formatted.130.data_augmentation.gemini.csv \
+  --dev_data data/lcsts_data/lcsts_eval_formatted_20.csv \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
   --model_dir ${MODEL_SAVE_PATH} \
   --model_specific_dir ${MODEL_SPECIFIC_PATH} \
-  --batch_size 16 \
+  --num_epoch 20 \
+  --batch_size 1 \
+  --lr 2e-5 \
   --max_len 1024 \
   --max_len_generate 150 \
   --version v1 \
-  --stage ${STAGE}
-
+  --stage third_stage \
+  --contrastive_weight 0.1
 }
 
 function main() {
-  echo_info "==================== start model infer script..."
+  echo_info "==================== start model train script..."
 #  check_args "$@"
   declare_variables
   prepare_python_env
 
-  time_diff model_infer
+  time_diff model_train
   echo_info "==================== all jobs finished~"
 }
 
