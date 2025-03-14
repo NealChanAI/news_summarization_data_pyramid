@@ -21,8 +21,6 @@ ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项�
 log = logging.getLogger(__name__)
 TEST_DATA_PATH = osp.join(ROOT_DIR, 'data', 'THUCNews', 'companies_news_info_v2.test.txt')
 
-'companies_news_info_v2.test.gpt4_infer.raw.txt'
-
 
 def compute_rouge(source, target):
     """计算rouge-1、rouge-2、rouge-l"""
