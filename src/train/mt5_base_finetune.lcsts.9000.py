@@ -16,8 +16,8 @@ import torch
 # 定义项目根目录和模型路径
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 PRETRAIN_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base')
-SAVED_MODEL_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_finetune_lcsts_9000')
-TRAIN_INFO_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_train_info')
+SAVED_MODEL_PATH = osp.join('/root/autodl-tmp', 'model', 'mt5_base_finetune_lcsts_9000')
+TRAIN_INFO_PATH = osp.join('/root/autodl-tmp', 'model', 'mt5_base_train_info')
 
 
 # 加载tokenizer和模型

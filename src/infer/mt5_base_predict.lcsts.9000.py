@@ -9,7 +9,7 @@
 
 
 from datasets import Dataset
-from transformers import BertTokenizer, BartForConditionalGeneration
+from transformers import MT5Tokenizer, MT5ForConditionalGeneration
 from os import path as osp
 import torch
 import re
@@ -18,12 +18,14 @@ import rouge
 # 定义项目根目录和模型路径
 ROOT_DIR = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))  # 项目根目录
 # MODEL_PATH = osp.join(ROOT_DIR, 'model', 'bart_base')
-MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_finetune_lcsts_9000')
+# MODEL_SAVE_PATH = osp.join(ROOT_DIR, 'model', 'mt5_base_finetune_lcsts_9000')
+MODEL_SAVE_PATH = osp.join('/root/autodl-tmp', 'model', 'mt5_base_finetune_lcsts_9000')
+print(f'MODEL_SAVE_PATH: {MODEL_SAVE_PATH}')
 
 
 # 加载tokenizer和模型
-tokenizer = BertTokenizer.from_pretrained(MODEL_SAVE_PATH)  # 使用 BertTokenizer
-model = BartForConditionalGeneration.from_pretrained(MODEL_SAVE_PATH)
+tokenizer = MT5Tokenizer.from_pretrained(MODEL_SAVE_PATH)  # 使用 BertTokenizer
+model = MT5ForConditionalGeneration.from_pretrained(MODEL_SAVE_PATH)
 model.to("cuda" if torch.cuda.is_available() else "cpu")
 
 

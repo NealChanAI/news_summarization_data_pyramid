@@ -56,7 +56,7 @@ function declare_variables() {
 function model_infer() {
   echo_info "========== model train..."
 
-  python src/infer/bart_base_predict.lcsts.9000.py
+  python src/infer/mt5_base_predict.lcsts.9000.py
 }
 
 function main() {
