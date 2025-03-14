@@ -31,6 +31,7 @@ regex==2024.11.6
 requests==2.32.3
 rouge==1.0.1
 sacremoses==0.1.1
+sentencepiece==0.2.0
 six==1.17.0
 tokenizers==0.10.3
 torch==1.10.1+cu113
