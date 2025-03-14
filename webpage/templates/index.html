@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Summarization Demo</title>
+    <style>
+        body { font-family: sans-serif; }
+        textarea { width: 100%; height: 200px; margin-bottom: 10px; }
+        .summary-box { border: 1px solid #ccc; padding: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Text Summarization Demo</h1>
+    <form method="POST" action="/">
+        <textarea name="text" placeholder="Enter text to summarize"></textarea>
+        <button type="submit">Summarize</button>
+    </form>
+
+    {% if original_text %}
+    <h2>Original Text:</h2>
+    <div class="summary-box">
+        <p>{{ original_text }}</p>
+    </div>
+    {% endif %}
+
+    {% if summary_text %}
+    <h2>Summary:</h2>
+    <div class="summary-box">
+        <p>{{ summary_text }}</p>
+    </div>
+    {% endif %}
+
+</body>
+</html>
