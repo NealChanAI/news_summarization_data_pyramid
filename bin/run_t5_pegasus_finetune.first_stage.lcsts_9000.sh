@@ -68,7 +68,7 @@ function model_train() {
   --max_len 1024 \
   --max_len_generate 68 \
   --version v1 \
-  --stage second_stage
+  --stage first_stage
 }
 
 function main() {

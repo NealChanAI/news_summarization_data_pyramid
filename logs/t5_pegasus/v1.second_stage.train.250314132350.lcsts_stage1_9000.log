@@ -1,0 +1,25 @@
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:51] ========== new log ==========
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[log.py:52] logfile is [/root/news_summarization_data_pyramid/logs/t5_pegasus/v1.second_stage.train.250314132350.lcsts_stage1_9000.log]
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:60] init logger done
+2025-03-14 13:23:50,188	[INFO]	[algo_reco.train]	[log.py:61] 
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:305] ===== input args =====
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] train_data: data/lcsts_data/lcsts_train_formatted.9000.csv
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] dev_data: data/lcsts_data/lcsts_train_formatted.1000.csv
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] pretrain_model: /root/news_summarization_data_pyramid/model/chinese_t5_pegasus_base_torch
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] model_dir: /root/news_summarization_data_pyramid/model/saved_model
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] model_specific_dir: t5_pegasus
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] num_epoch: 3
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] batch_size: 16
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] lr: 0.0002
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] data_parallel: False
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] max_len: 1024
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] max_len_generate: 68
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] length_penalty: 1.2
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] version: v1
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:307] stage: second_stage
+2025-03-14 13:23:50,188	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.lcsts.9000.py:308] 

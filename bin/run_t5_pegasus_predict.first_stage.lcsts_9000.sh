@@ -60,7 +60,7 @@ function declare_variables() {
 function model_infer() {
   echo_info "========== model infer..."
 
-  python src/infer/t5_pegasus_predict.lcsts_9000.py \
+  python src/infer/t5_pegasus_predict.first_stage.lcsts_9000.py \
   --test_data data/lcsts_data/lcsts_val_formatted.csv \
   --result_file data/lcsts_data/lcsts_val_formatted.first_stage_infer.lcsts_9000.csv \
   --pretrain_model ${PRETRAIN_MODEL_PATH} \
