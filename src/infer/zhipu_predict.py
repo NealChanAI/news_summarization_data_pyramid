@@ -8,8 +8,6 @@
 # ===============================================================
 
 
-import pandas as pd
-import numpy as np
 import os
 from os import path as osp
 from zhipuai import core as zhipu_core
@@ -273,5 +271,5 @@ if __name__ == '__main__':
     output_file_name = f'companies_news_info_v2.test.llm_infer.txt'
 
     inferor = TestDataLLMInfer(model_type, output_file_name, input_file_name)
-    inferor.pseudo_summary_generate_workflow()
+    # inferor.pseudo_summary_generate_workflow()
     inferor._compute_rouges()
