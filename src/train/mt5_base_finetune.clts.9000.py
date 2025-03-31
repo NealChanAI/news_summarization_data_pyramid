@@ -108,8 +108,8 @@ def training_workflow():
         output_dir=TRAIN_INFO_PATH,  # 输出目录
         evaluation_strategy="epoch",  # 每个 epoch 结束后进行评估
         learning_rate=5e-5,  # 学习率
-        per_device_train_batch_size=16,  # 训练 batch size
-        per_device_eval_batch_size=16,  # 评估 batch size
+        per_device_train_batch_size=4,  # 训练 batch size
+        per_device_eval_batch_size=4,  # 评估 batch size
         num_train_epochs=3,  # 训练 epoch 数
         weight_decay=0.01,  # weight decay
         save_total_limit=3,  # 最多保存的模型数量

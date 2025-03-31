@@ -1,0 +1,23 @@
+2025-03-25 21:15:55,384	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-25 21:15:55,385	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-25 21:15:55,385	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-25 21:15:55,385	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-25 21:15:55,385	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-03-25 21:15:55,385	[INFO]	[algo_reco.train]	[log.py:51] ========== new log ==========
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[log.py:52] logfile is [/root/news_summarization_data_pyramid/logs/t5_pegasus/v1.third_stage.predict.250325211555.log]
+2025-03-25 21:15:55,385	[INFO]	[algo_reco.train]	[log.py:60] init logger done
+2025-03-25 21:15:55,385	[INFO]	[algo_reco.train]	[log.py:61] 
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:292] ===== input args =====
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] test_data: data/THUCNews/companies_news_info_v2.test.txt
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] result_file: data/THUCNews/companies_news_info_v2.test.direct_infer.third_stage.tsv
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] pretrain_model: /root/news_summarization_data_pyramid/model/chinese_t5_pegasus_base_torch
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] model_dir: /root/news_summarization_data_pyramid/model/saved_model
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] model_specific_dir: t5_pegasus
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] batch_size: 16
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] max_len: 1024
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] max_len_generate: 150
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] length_penalty: 1.2
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] use_multiprocess: False
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] version: v1
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:294] stage: third_stage
+2025-03-25 21:15:55,385	[DEBUG]	[algo_reco.train]	[t5_pegasus_predict.py:295] 
