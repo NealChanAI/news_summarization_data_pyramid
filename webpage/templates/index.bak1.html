@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>企业新闻资讯摘要生成</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        /* 容器：限制内容宽度并居中 */
+        .container {
+            /* *** 修改这里：进一步增加最大宽度 *** */
+            max-width: 1200px; /* 或者可以尝试 1400px，甚至 90% 或 95% */
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* 头部样式 */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #0056b3;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        /* 表单样式 */
+        form {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        textarea {
+            width: calc(100% - 20px); /* 宽度100%减去padding */
+            height: 200px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            resize: vertical;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        textarea::placeholder {
+            color: #999;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #004085;
+        }
+
+        /* 输出区域样式 */
+        .output-section {
+            margin-top: 20px;
+        }
+
+        .output-section h2 {
+            color: #0056b3;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 5px;
+        }
+
+        .summary-box {
+            border: 1px solid #dcdcdc;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            word-wrap: break-word;
+        }
+
+        .summary-box p {
+            margin: 0;
+            color: #555;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>企业新闻资讯摘要生成</h1>
+            <!-- 可以在这里添加一个公司Logo或者副标题 -->
+            <!-- <p>智能文本处理工具</p> -->
+        </header>
+
+        <form method="POST" action="/">
+            <label for="text_input">请输入需要生成摘要的文本:</label>
+            <textarea id="text_input" name="text" placeholder="粘贴或输入新闻资讯原文..."></textarea>
+            <button type="submit">生成摘要</button>
+        </form>
+
+        {% if original_text %}
+        <div class="output-section">
+            <h2>原文:</h2>
+            <div class="summary-box">
+                <p>{{ original_text }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if summary_text %}
+        <div class="output-section">
+            <h2>摘要:</h2>
+            <div class="summary-box">
+                <p>{{ summary_text }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div> <!-- End of container -->
+
+    <!-- 可以在这里添加一个简单的页脚 -->
+    <!-- <footer>
+        <p style="text-align: center; margin-top: 30px; font-size: 0.9em; color: #777;">© 2023 Your Company Name</p>
+    </footer> -->
+
+</body>
+</html>

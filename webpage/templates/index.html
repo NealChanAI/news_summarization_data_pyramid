@@ -2,158 +2,644 @@
 <html>
 <head>
     <title>企业新闻资讯摘要生成</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 引入 Google Font: Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- 引入 Font Awesome 图标库 (用于其他图标，如新建会话、历史会话等) -->
+    <!-- 如果您也想使用本地的 Font Awesome 文件，需要将 Font Awesome 的 css 和 webfonts 文件夹也移到 static 目录下，并修改这里的 link 标签 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5HtYsEEerzWZmooWtWUnPhgLz8STmOPsoom2EvK+qmINb1rv/lyXEvj0+GiT7PgWeEVSTbWEKOncnBkt+flKW+nwCpCwp2tECGA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
+        /* 所有的 CSS 样式将放在这里 */
+
         /* 全局样式 */
-        body {
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
+        html, body {
             margin: 0;
             padding: 0;
-            background-color: #f4f7f6;
+            font-family: 'Roboto', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            background-color: #f4f7f6; /* 背景色 */
             color: #333;
+            overflow: hidden; /* 防止全局滚动条 */
+            height: 100%; /* 使html和body填充整个视口高度 */
         }
 
-        /* 容器：限制内容宽度并居中 */
-        .container {
-            /* *** 修改这里：进一步增加最大宽度 *** */
-            max-width: 1200px; /* 或者可以尝试 1400px，甚至 90% 或 95% */
-            margin: 40px auto;
-            padding: 30px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+        /* 应用布局容器 */
+        .app-layout {
+            display: flex; /* 启用Flexbox布局 */
+            height: 100vh; /* 占据整个视口高度 */
+            overflow: hidden; /* 防止内容溢出导致布局错乱 */
         }
 
-        /* 头部样式 */
-        header {
+        /* 左侧侧边栏样式 */
+        .sidebar {
+            width: 250px; /* 固定宽度 */
+            background-color: #e9ecef; /* 侧边栏背景色 */
+            color: #495057; /* 侧边栏文字颜色 */
+            padding: 20px 15px; /* 内边距 */
+            display: flex; /* 内部使用Flexbox垂直布局 */
+            flex-direction: column;
+            flex-shrink: 0; /* 防止侧边栏被压缩 */
+            overflow-y: auto; /* 侧边栏内容可滚动 */
+            border-right: 1px solid #dee2e6; /* 右侧边框 */
+        }
+
+        .sidebar-header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ced4da;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* 尝试居中 Logo */
+            /* 移除 font-weight, font-size, color，因为现在是图片 */
+            /* font-weight: 700; */
+            /* font-size: 1.2em; */
+            /* color: #343a40; */
         }
 
-        header h1 {
+        /* 移除 app-icon 和 app-title 样式 */
+        /* .app-icon { ... } */
+        /* .app-title { ... } */
+
+        /* 新增：侧边栏 Logo 图片样式 */
+        .sidebar-logo {
+            max-height: 40px; /* 控制 Logo 图片的最大高度 */
+            display: block; /* 使图片成为块级元素，方便居中 */
+            margin: 0 auto; /* 居中图片 */
+        }
+
+
+        .sidebar-nav ul, .sidebar-history ul {
+            list-style: none;
+            padding: 0;
             margin: 0;
-            color: #0056b3;
-            font-size: 2em;
-            font-weight: 600;
         }
 
-        /* 表单样式 */
-        form {
-            margin-bottom: 30px;
+        .sidebar-nav li, .sidebar-history li {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
         }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
+        .sidebar-nav li i, .sidebar-history li i {
+            margin-right: 10px;
+            color: #6c757d; /* 图标颜色 */
+            font-size: 1.1em;
+        }
+
+        .sidebar-nav li:hover, .sidebar-history li:hover {
+            background-color: #d8e0e7; /* 鼠标悬停背景色 */
+        }
+
+        .sidebar-nav li.active {
+            background-color: #007bff; /* 选中项背景色 */
+            color: white; /* 选中项文字颜色 */
             font-weight: 600;
+        }
+        .sidebar-nav li.active i {
+             color: white; /* 选中项图标颜色 */
+        }
+
+
+        .sidebar-history h3 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #ced4da;
+            font-size: 1em;
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar-history h3 i {
+            margin-right: 8px;
+            font-size: 1em;
             color: #555;
         }
 
-        textarea {
-            width: calc(100% - 20px); /* 宽度100%减去padding */
-            height: 200px;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
+        .sidebar-history li {
+            white-space: nowrap; /* 防止历史记录项文字换行 */
+            overflow: hidden; /* 隐藏超出部分 */
+            text-overflow: ellipsis; /* 显示省略号 */
+            padding: 8px 15px; /* 调整历史记录项内边距 */
+        }
+
+        .view-all {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #007bff;
+            cursor: pointer;
+            padding: 5px 0;
             border-radius: 4px;
-            font-size: 1em;
-            resize: vertical;
-            box-sizing: border-box;
-            font-family: inherit;
+            transition: background-color 0.2s ease;
+        }
+        .view-all:hover {
+            background-color: #cfe2ff;
         }
 
-        textarea::placeholder {
-            color: #999;
+
+        .sidebar-footer {
+            margin-top: auto; /* 将 footer 推到底部 */
+            padding-top: 15px;
+            border-top: 1px solid #ced4da;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #555;
         }
 
-        button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
+        .user-info {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* 用户头像图片样式 */
+        .user-avatar {
+            /* font-size 和 color 不适用于 img，已移除 */
+            width: 28px; /* 设置图片宽度 */
+            height: 28px; /* 设置图片高度，保持宽高比或使其为正方形 */
+            margin-right: 8px; /* 右侧间距 */
+            /* 如果需要圆形头像，可以添加 border-radius: 50%; */
+            /* 如果图片不是正方形且需要填充区域，可以添加 object-fit: cover; */
+        }
+
+        /* 右侧主内容区域样式 */
+        .main-content {
+            flex-grow: 1; /* 占据剩余宽度 */
+            display: flex; /* 内部使用Flexbox垂直布局 */
+            flex-direction: column;
+            background-color: #fff; /* 主内容区背景色 */
+            overflow: hidden; /* 防止内部元素溢出 */
+        }
+
+        /* 主内容区域头部样式 */
+        .main-header {
+            padding: 20px 30px; /* 内边距 */
+            border-bottom: 1px solid #eee; /* 底部边框 */
+            flex-shrink: 0; /* 防止头部被压缩 */
+            display: flex;
+            justify-content: space-between; /* 标题和右侧元素分开 */
+            align-items: center;
+            background-color: #fff; /* 确保背景色 */
+            z-index: 1; /* 确保在滚动内容上方 */
+        }
+
+        .page-title {
+            margin: 0;
+            color: #0056b3;
+            font-size: 1.8em; /* 稍微减小标题字号适应布局 */
+            font-weight: 600;
+        }
+        /* 移除 header-info 样式 */
+        /* .header-info { ... } */
+
+        /* 头部右侧操作按钮容器 */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 按钮之间的间距 */
+        }
+
+        /* 头部操作按钮样式 (例如保存按钮) */
+        .action-button {
+            padding: 8px 15px; /* 调整内边距 */
+            background-color: #6c757d; /* 使用一个次要颜色 */
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 4px; /* 稍微小一点的圆角 */
             cursor: pointer;
+            font-size: 0.9em; /* 调整字号 */
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-button i {
             font-size: 1em;
-            transition: background-color 0.3s ease;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        .action-button:hover {
+            background-color: #5a6268;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
         }
 
-        button:active {
-            background-color: #004085;
+        .action-button:active {
+            background-color: #4e555b;
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
+
+
+        /* 可滚动的内容区域样式 */
+        .content-wrapper {
+            flex-grow: 1; /* 占据剩余垂直空间 */
+            overflow-y: auto; /* 垂直滚动条 */
+            padding: 20px 30px; /* 内边距 */
+            /* 可以设置 max-width 控制内容宽度在非常宽的屏幕上 */
+            /* max-width: 1000px; */
+            /* margin: 0 auto; /* 如果设置 max-width，可以居中 */
+        }
+
+        /* 介绍性文字样式 */
+        .intro-text {
+            /* 修改：减小内边距和底部外边距，精简背景和边框 */
+            margin-bottom: 15px; /* 减小底部外边距 */
+            padding: 10px 15px; /* 减小内边距 */
+            background-color: #f8f9fa; /* 浅灰色背景 */
+            border-left: 3px solid #007bff; /* 细一点的左侧强调色边框 */
+            border-radius: 4px;
+            color: #555;
+            font-size: 0.95em; /* 稍微减小字号 */
+            line-height: 1.6;
+        }
+        /* 修改：精简介绍性文字内容 */
+        .intro-text p {
+             margin: 0; /* 移除段落默认外边距 */
+        }
+
 
         /* 输出区域样式 */
         .output-section {
-            margin-top: 20px;
+            margin-bottom: 20px; /* 增加下方外边距 */
         }
 
         .output-section h2 {
-            color: #0056b3;
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            border-bottom: 1px dashed #eee;
+            color: #007bff;
+            font-size: 1.4em; /* 调整标题字号 */
+            margin-bottom: 10px; /* 调整下方外边距 */
             padding-bottom: 5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .output-section h2 .icon-left {
+            margin-right: 8px; /* 图标右侧间距 */
+            color: #007bff;
+            font-size: 1.1em;
         }
 
         .summary-box {
-            border: 1px solid #dcdcdc;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
+            border: 1px solid #cfe2ff;
+            padding: 15px; /* 调整内边距 */
+            background-color: #eef4ff;
+            border-radius: 8px;
             word-wrap: break-word;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            font-size: 1em; /* 调整字体大小 */
+            color: #333;
+            line-height: 1.7;
         }
 
         .summary-box p {
             margin: 0;
-            color: #555;
         }
 
+        /* 区分原文和摘要的背景色 (可选) */
+        .summary-box.original {
+             background-color: #f8f9fa; /* 原文使用稍深的背景 */
+             border-color: #dee2e6;
+        }
+
+        .summary-box.summary {
+            background-color: #eef4ff; /* 摘要使用浅蓝色背景 */
+            border-color: #cfe2ff;
+        }
+
+
+        /* 没有输出时的占位提示样式 */
+        .placeholder-content {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+        .placeholder-content i {
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+        /* 新增：移除 placeholder-content 中的 p 标签样式，因为 p 标签被移除了 */
+        /* .placeholder-content p {
+             margin: 0;
+        } */
+
+
+        /* 底部输入区域容器样式 */
+        .input-area-container {
+            padding: 15px 30px; /* 内边距 */
+            border-top: 1px solid #eee; /* 顶部边框 */
+            background-color: #fff; /* 背景色 */
+            flex-shrink: 0; /* 防止被压缩 */
+        }
+
+        .input-form {
+            display: flex; /* 启用Flexbox布局 */
+            align-items: flex-end; /* 底部对齐 */
+            gap: 10px; /* 输入框和按钮之间的间距 */
+        }
+
+        .input-area-container textarea {
+            flex-grow: 1; /* 占据剩余宽度 */
+            height: auto; /* 高度由 rows 或内容决定 */
+            /* 保持之前调高的最小高度 */
+            min-height: 180px; /* 增大最小高度 */
+            max-height: 300px; /* 也可以适当增大最大高度 */
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            resize: vertical; /* 允许垂直拉伸 */
+            box-sizing: border-box;
+            font-family: inherit;
+             margin-bottom: 0; /* 移除之前的底部外边距 */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            overflow-y: auto; /* 如果内容超高，内部滚动 */
+        }
+
+        .input-area-container textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .input-area-container textarea::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .send-button {
+            /* 按钮样式调整 */
+            padding: 12px 20px; /* 调整内边距 */
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em; /* 调整字号 */
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0; /* 防止按钮被压缩 */
+            display: flex; /* 让图标和文字水平居中 */
+            align-items: center;
+             gap: 5px; /* 图标和文字间距 */
+        }
+
+        .send-button i {
+             font-size: 1.1em; /* 图标大小 */
+        }
+
+
+        .send-button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .send-button:active {
+            background-color: #004085;
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 响应性：在小屏幕上改变布局 */
+        @media (max-width: 768px) {
+            .app-layout {
+                flex-direction: column; /* 在小屏幕上垂直堆叠 */
+                height: auto; /* 高度不再固定100vh */
+                min-height: 100vh; /* 保证最小高度 */
+            }
+
+            .sidebar {
+                width: 100%; /* 侧边栏占据全宽 */
+                height: auto; /* 高度自适应内容 */
+                max-height: 100px; /* 可以限制侧边栏在顶部时的高度 */
+                overflow-y: auto; /* 仍然允许滚动 */
+                border-right: none;
+                border-bottom: 1px solid #dee2e6; /* 添加底部边框 */
+                padding: 15px 20px;
+            }
+             .sidebar-header {
+                  justify-content: flex-start; /* 左对齐 */
+                  padding-bottom: 10px;
+                   margin-bottom: 10px;
+             }
+             .sidebar-nav ul, .sidebar-history ul {
+                  display: flex; /* 导航和历史记录项可以水平排列 */
+                  overflow-x: auto; /* 如果水平排不下，允许水平滚动 */
+                   padding-bottom: 10px; /* 防止滚动条遮挡内容 */
+             }
+             .sidebar-nav li, .sidebar-history li {
+                  flex-shrink: 0; /* 防止项被压缩 */
+                  margin-right: 10px; /* 项之间右侧间距 */
+                  margin-bottom: 0; /* 移除底部间距 */
+                  padding: 8px 12px;
+             }
+            .sidebar-history h3 {
+                 margin-top: 10px;
+                 margin-bottom: 8px;
+                 padding-bottom: 3px;
+            }
+             .sidebar-footer {
+                  /* 小屏幕下 footer 可以隐藏或调整 */
+                  display: none;
+             }
+
+
+            .main-content {
+                flex-grow: 1; /* 继续占据剩余空间 */
+                height: auto; /* 高度自适应 */
+            }
+
+            .main-header {
+                padding: 15px 20px; /* 调整内边距 */
+                 /* 新增：小屏幕下调整头部布局 */
+                 flex-direction: column;
+                 align-items: flex-start;
+            }
+            .page-title {
+                 font-size: 1.5em;
+                 margin-bottom: 5px; /* 调整标题下方间距 */
+            }
+             /* 移除小屏幕下的 header-info 样式 */
+             /* .header-info { ... } */
+             /* 新增：小屏幕下调整头部操作按钮容器 */
+             .header-actions {
+                 width: 100%; /* 占据全宽 */
+                 justify-content: flex-end; /* 右对齐 */
+             }
+             .action-button {
+                 padding: 6px 12px; /* 调整按钮内边距 */
+                 font-size: 0.85em;
+             }
+
+
+            .content-wrapper {
+                padding: 15px 20px; /* 调整内边距 */
+                overflow-y: auto; /* 继续垂直滚动 */
+            }
+
+            .intro-text {
+                 padding: 8px 10px; /* 小屏幕下进一步减小内边距 */
+                 font-size: 0.9em; /* 小屏幕下进一步减小字号 */
+                 margin-bottom: 10px;
+            }
+
+            .output-section h2 {
+                font-size: 1.3em;
+            }
+            .output-section h2 .icon-left {
+                font-size: 1em;
+            }
+            .summary-box {
+                 padding: 12px;
+                 font-size: 0.95em;
+            }
+
+            .input-area-container textarea {
+                 /* 保持小屏幕下调整后的最小高度 */
+                 min-height: 80px;
+                 max-height: 150px;
+                 font-size: 0.95em;
+                 padding: 10px;
+             }
+
+            .send-button {
+                padding: 10px 15px; /* 调整按钮内边距 */
+                font-size: 0.95em;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>企业新闻资讯摘要生成</h1>
-            <!-- 可以在这里添加一个公司Logo或者副标题 -->
-            <!-- <p>智能文本处理工具</p> -->
-        </header>
-
-        <form method="POST" action="/">
-            <label for="text_input">请输入需要生成摘要的文本:</label>
-            <textarea id="text_input" name="text" placeholder="粘贴或输入新闻资讯原文..."></textarea>
-            <button type="submit">生成摘要</button>
-        </form>
-
-        {% if original_text %}
-        <div class="output-section">
-            <h2>原文:</h2>
-            <div class="summary-box">
-                <p>{{ original_text }}</p>
+    <div class="app-layout">
+        <!-- 左侧侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                 <!-- 修改：使用公司 Logo 图片替换图标和文本 -->
+                 <img src="{{ url_for('static', filename='css/logo.svg') }}" alt="公司 Logo" class="sidebar-logo">
+                 <!-- 移除原来的图标和文本 -->
+                 <!-- <span class="app-icon"><i class="fas fa-building"></i></span> -->
+                 <!-- <span class="app-title">摘要生成</span> -->
+            </div>
+            <div class="sidebar-nav">
+                <ul>
+                    <li class="active"><i class="fas fa-plus-circle"></i> 新建会话</li>
+                     <li><i class="fas fa-search"></i> 高级功能</li>
+                </ul>
+            </div>
+             <div class="sidebar-history">
+                 <!-- 历史会话标题和图标 (保留) -->
+                 <h3><i class="fas fa-history"></i> 历史会话</h3>
+                 <ul>
+                     <!-- 示例历史记录项文本 -->
+                     <li>Facebook发布最新财报，营收...</li>
+                     <li>胡润首次发布元宇宙企业榜</li>
+                     <li>华为云智能流程机器人</li>
+                     <li>亚洲最大航运集团之一商船三井...</li>
+                     <li>微软宣布停售AI情绪识别技术</li>
+                     <li>西门子投资2500万美元</li>
+                     <li>施耐德电气同意将俄罗斯业务售予...</li>
+                     <!-- 更多示例历史记录项 -->
+                 </ul>
+                 <div class="view-all">查看全部</div>
+             </div>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <!-- 修改：使用本地 SVG 图片作为用户头像，使用 Flask 的 url_for -->
+                    <!-- 在这里添加用户头像图片 -->
+                    <img src="{{ url_for('static', filename='css/avatar.svg') }}" alt="用户头像" class="user-avatar">
+                    <span class="user-name">企业用户_9053</span>
+                </div>
+                <i class="fas fa-chevron-down"></i> <!-- 下拉图标 -->
             </div>
         </div>
-        {% endif %}
 
-        {% if summary_text %}
-        <div class="output-section">
-            <h2>摘要:</h2>
-            <div class="summary-box">
-                <p>{{ summary_text }}</p>
-            </div>
-        </div>
-        {% endif %}
-    </div> <!-- End of container -->
+        <!-- 右侧主内容区域 -->
+        <div class="main-content">
+            <header class="main-header">
+                 <!-- 主标题 -->
+                <h1 class="page-title">企业新闻资讯摘要生成</h1>
+                 <!-- 头部右侧操作区域 -->
+                 <div class="header-actions">
+                     <!-- 移除：智能文本处理工具文本 -->
+                     <!-- <div class="header-info">智能文本处理工具</div> -->
+                     <!-- 保存会话按钮 -->
+                     <button type="button" class="action-button">
+                         <i class="fas fa-save"></i> 保存会话
+                     </button>
+                 </div>
+            </header>
 
-    <!-- 可以在这里添加一个简单的页脚 -->
-    <!-- <footer>
-        <p style="text-align: center; margin-top: 30px; font-size: 0.9em; color: #777;">© 2023 Your Company Name</p>
-    </footer> -->
+            <!-- 可滚动的内容区域 -->
+            <div class="content-wrapper">
+                 <!-- 介绍性文字 (保留，但内容已精简) -->
+                <div class="intro-text">
+                    <!-- 修改：精简文本内容 -->
+                    <p>请在下方输入新闻资讯原文，生成摘要。</p>
+                </div>
+
+                <!-- 原文输出区域 -->
+                {% if original_text %}
+                <div class="output-section">
+                    <h2><i class="fas fa-file-alt icon-left"></i>原文:</h2>
+                    <div class="summary-box original"> <!-- 添加 class original 区分 -->
+                        <p>{{ original_text }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 摘要输出区域 -->
+                {% if summary_text %}
+                <div class="output-section">
+                    <h2><i class="fas fa-clipboard-list icon-left"></i>摘要:</h2>
+                    <div class="summary-box summary"> <!-- 添加 class summary 区分 -->
+                        <p>{{ summary_text }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                 <!-- 如果没有原文和摘要，可以在这里显示一个初始提示 -->
+                 {% if not original_text and not summary_text %}
+                 <div class="placeholder-content">
+                     <i class="fas fa-lightbulb fa-3x"></i>
+                     <!-- 移除：占位提示文本 -->
+                     <!-- <p>请在下方输入框粘贴新闻资讯内容，然后点击“生成摘要”。</p> -->
+                 </div>
+                 {% endif %}
+
+            </div> <!-- End of content-wrapper -->
+
+            <!-- 底部输入区域 -->
+            <div class="input-area-container">
+                 <form method="POST" action="/" class="input-form"> <!-- 添加 class input-form -->
+                     <!-- 保持 textarea 的 rows 属性 -->
+                     <textarea id="text_input" name="text" placeholder="输入你的新闻资讯原文..." rows="8"></textarea> <!-- 增加初始可见行数 -->
+                     <button type="submit" class="send-button">
+                         <i class="fas fa-paper-plane"></i> 生成
+                     </button>
+                 </form>
+            </div> <!-- End of input-area-container -->
+
+        </div> <!-- End of main-content -->
+    </div> <!-- End of app-layout -->
 
 </body>
 </html>
