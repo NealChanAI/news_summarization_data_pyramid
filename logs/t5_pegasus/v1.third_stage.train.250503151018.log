@@ -1,0 +1,50 @@
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:50] 
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:51] ========== new log ==========
+2025-05-03 15:10:18,704	[DEBUG]	[algo_reco.train]	[log.py:52] logfile is [/root/news_summarization_data_pyramid/logs/t5_pegasus/v1.third_stage.train.250503151018.log]
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:60] init logger done
+2025-05-03 15:10:18,704	[INFO]	[algo_reco.train]	[log.py:61] 
+2025-05-03 15:10:18,704	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:372] ===== input args =====
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] train_data: data/THUCNews/companies_news_info_v2.train.data_augmentation.gemini.txt
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] dev_data: data/THUCNews/companies_news_info_v2.valid.txt
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] pretrain_model: /root/news_summarization_data_pyramid/model/chinese_t5_pegasus_base_torch
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] model_dir: /root/news_summarization_data_pyramid/model/saved_model
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] model_specific_dir: t5_pegasus
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] num_epoch: 20
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] batch_size: 1
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] lr: 2e-05
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] data_parallel: False
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] max_len: 1024
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] max_len_generate: 150
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] length_penalty: 1.2
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] version: v1
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] stage: third_stage
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:374] contrastive_weight: 0.1
+2025-05-03 15:10:18,705	[DEBUG]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:375] 
+2025-05-03 15:10:24,608	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 0:  Training Loss: 0.9693089723587036, Summary Loss: 0.9607172608375549
+2025-05-03 15:10:26,422	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 10:  Training Loss: 0.444003701210022, Summary Loss: 0.44400346279144287
+2025-05-03 15:10:28,102	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 20:  Training Loss: 1.0031154155731201, Summary Loss: 0.9337176084518433
+2025-05-03 15:10:29,817	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 30:  Training Loss: 0.3504315912723541, Summary Loss: 0.3504315912723541
+2025-05-03 15:10:31,554	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 40:  Training Loss: 0.6423951983451843, Summary Loss: 0.6264883279800415
+2025-05-03 15:10:33,286	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 50:  Training Loss: 0.5582742691040039, Summary Loss: 0.5582737922668457
+2025-05-03 15:10:34,991	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 60:  Training Loss: 0.4538261890411377, Summary Loss: 0.45382601022720337
+2025-05-03 15:10:36,703	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 70:  Training Loss: 0.28883522748947144, Summary Loss: 0.28883248567581177
+2025-05-03 15:10:38,503	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 80:  Training Loss: 0.3304230272769928, Summary Loss: 0.3304230272769928
+2025-05-03 15:10:40,198	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 90:  Training Loss: 0.5101351737976074, Summary Loss: 0.5101350545883179
+2025-05-03 15:10:41,838	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 100:  Training Loss: 0.4007822275161743, Summary Loss: 0.40078213810920715
+2025-05-03 15:10:43,603	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 110:  Training Loss: 0.6201586127281189, Summary Loss: 0.6201586127281189
+2025-05-03 15:10:45,306	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 120:  Training Loss: 0.4397614598274231, Summary Loss: 0.4065972566604614
+2025-05-03 15:10:59,835	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:335] Validation Loss: {'rouge-1': 0.778489723985039, 'rouge-2': 0.6826182331528885, 'rouge-l': 0.7662549900890091}
+2025-05-03 15:11:01,382	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 0:  Training Loss: 0.07921884953975677, Summary Loss: 0.07921883463859558
+2025-05-03 15:11:03,125	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 10:  Training Loss: 0.156701922416687, Summary Loss: 0.156701922416687
+2025-05-03 15:11:04,778	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 20:  Training Loss: 0.24625834822654724, Summary Loss: 0.24608032405376434
+2025-05-03 15:11:06,458	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 30:  Training Loss: 0.07560879737138748, Summary Loss: 0.07560638338327408
+2025-05-03 15:11:08,155	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 40:  Training Loss: 0.08608316630125046, Summary Loss: 0.08608316630125046
+2025-05-03 15:11:09,852	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 50:  Training Loss: 0.23729108273983002, Summary Loss: 0.23729108273983002
+2025-05-03 15:11:11,525	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 60:  Training Loss: 0.4497305154800415, Summary Loss: 0.4497305154800415
+2025-05-03 15:11:13,185	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 70:  Training Loss: 0.09020347893238068, Summary Loss: 0.09020256251096725
+2025-05-03 15:11:14,905	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 80:  Training Loss: 0.31430768966674805, Summary Loss: 0.2791201174259186
+2025-05-03 15:11:16,556	[INFO]	[algo_reco.train]	[t5_pegasus_finetune.third_stage.py:304] Iter 90:  Training Loss: 0.11867258697748184, Summary Loss: 0.11867257952690125
